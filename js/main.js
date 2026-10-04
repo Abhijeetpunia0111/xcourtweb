@@ -312,7 +312,7 @@
      Sound is ON by default. Browsers refuse unmuted autoplay until the visitor has interacted with the page, so if the
      first attempt is refused the video plays muted and the sound switches on at the first click / tap / key press. */
   let soundOn = true;
-  const muteBtn = $('#muteBtn');
+  const muteBtn = $('#muteBtn'), sndHint = $('#sndHint');
   const curVideo = () => $('video', slideEls[cur]);
   const isReady = (v) => v && v.classList.contains('is-ready');
 
@@ -323,6 +323,7 @@
     const audible = show && !v.muted && !v.paused;
     muteBtn.classList.toggle('is-muted', !audible);
     muteBtn.setAttribute('aria-pressed', String(audible));
+    sndHint.classList.toggle('is-on', show && soundOn && v.muted && !v.paused);   // browser is holding the sound back: ask for one click
     const txt = audible ? 'Mute sound' : (soundOn ? 'Tap for sound' : 'Unmute sound');
     muteBtn.setAttribute('aria-label', txt); muteBtn.setAttribute('title', txt);
   }

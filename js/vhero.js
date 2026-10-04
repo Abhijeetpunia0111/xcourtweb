@@ -6,6 +6,7 @@
   const v = document.getElementById('vhVideo');
   const btn = document.getElementById('vhSound');
   const lbl = document.getElementById('vhSoundLbl');
+  const hint = document.getElementById('vhHint');
   if (!v || !btn) return;
 
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -17,6 +18,7 @@
     btn.setAttribute('aria-pressed', String(on));
     const txt = on ? 'Sound on, click to mute' : (wantSound ? 'Tap for sound' : 'Sound off, click to unmute');
     lbl.textContent = txt; btn.setAttribute('title', txt);
+    if (hint) hint.classList.toggle('is-on', wantSound && v.muted && !v.paused);   // browser is holding the sound back: ask for one click
   };
   const play = () => v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });   // if sound is refused, still play (muted)
 

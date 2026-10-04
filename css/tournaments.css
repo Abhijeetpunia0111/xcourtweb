@@ -247,3 +247,7 @@
   .vh-copy .ql, .vh-cta { opacity: 1; transform: none; animation: none; }
   .vh-sound.is-off::after { animation: none; }
 }
+
+/* "click for sound" cue above the banner's sound button */
+.vh-hint { z-index: 4; right: calc(var(--pad) + 10px); bottom: calc(clamp(28px, 6vh, 64px) + 58px); }
+@media (max-width: 900px) { .vh-hint { bottom: 82px; } }
