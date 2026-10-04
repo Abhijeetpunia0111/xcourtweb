@@ -1,6 +1,5 @@
 /* ==========================================================
    Tournaments page
-   - pinned trophy story (spotlight → question → sport badges)
    - upcoming / ongoing tournaments (sample data)
    - player account + trophy cabinet (stored in this browser only)
    - photo gallery with lightbox
@@ -12,7 +11,7 @@
   const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
 
   /* ----------------------------------------------------------
-     Sample data  — replace with the club's real fixtures
+     Sample data  - replace with the club's real fixtures
   ---------------------------------------------------------- */
   const SPORTS = { tennis: 'Tennis', pickleball: 'Pickleball', cricket: 'Box Cricket', football: 'Football', swimming: 'Swimming', tabletennis: 'Table Tennis' };
 
@@ -40,12 +39,23 @@
   ];
 
   const SHOTS = [
-    ['assets/img/tennis.jpg', 'Tennis match point'],
-    ['assets/img/pickleball.jpg', 'Pickleball on the blue court'],
-    ['assets/img/court-aerial-portrait.jpg', 'A clay court seen from above'],
-    ['assets/img/football.jpg', 'Football kick-about'],
-    ['assets/img/track.jpg', 'Sprint on the track'],
-    ['assets/img/gameready.jpg', 'Game ready'],
+    ['assets/img/moments/winners-podium.webp', 'Winners with paddles at the Hyderabad Open'],
+    ['assets/img/moments/pickleball-action.webp', 'Pickleball rally under the Crosscourt banner'],
+    ['assets/img/moments/trophy-presentation.webp', 'Trophy presentation on court, under the lights'],
+    ['assets/img/moments/aerial-courts.webp', 'Tennis courts from above'],
+    ['assets/img/moments/prize-cheque.webp', 'Prize cheque ceremony'],
+    ['assets/img/moments/tennis-ready.webp', 'Junior tennis player in the ready position'],
+    ['assets/img/moments/carnival-crowd.webp', 'The crowd at the XCS Sports Carnival'],
+    ['assets/img/moments/net-player.webp', 'Player at the net'],
+    ['assets/img/moments/carnival-gate.webp', 'Entrance to the XCS Sports Carnival'],
+    ['assets/img/moments/night-aerial.webp', 'The club at night, floodlights on'],
+    ['assets/img/moments/group-trophy.webp', 'Champion with his team and trophy'],
+    ['assets/img/moments/box-cricket.webp', 'A box cricket game in progress'],
+    ['assets/img/moments/winner.webp', 'Junior champion with her trophy'],
+    ['assets/img/moments/award-handover.webp', 'Award handover at the Hyderabad Open'],
+    ['assets/img/moments/pickleball-courts.webp', 'Pickleball courts from above'],
+    ['assets/img/moments/carrom.webp', 'Friends playing carrom at the carnival'],
+    ['assets/img/moments/football-cage.webp', 'The football cage from the air'],
   ];
 
   /* ----------------------------------------------------------
@@ -64,68 +74,6 @@
   const isReg = (id) => regs.some((r) => r.id === id);
   const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.classList.add('is-on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('is-on'), 2600); };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-  /* ----------------------------------------------------------
-     Arena: badges + dust + pinned choreography
-  ---------------------------------------------------------- */
-  $$('.abadge').forEach((li, i) => {
-    li.style.setProperty('--i', i);
-    li.innerHTML = `<div class="abadge-in">${Badge(li.dataset.kind)}<b>${li.dataset.name}</b></div>`;
-  });
-
-  const dust = $('#dust');
-  if (dust && !reduce) {
-    dust.style.cssText = 'position:absolute;inset:0';
-    for (let i = 0; i < 18; i++) {
-      const s = document.createElement('span');
-      s.className = 'dust';
-      s.style.cssText = `left:${40 + Math.random() * 20}%;--d:${(-Math.random() * 10).toFixed(2)}s;--t:${(7 + Math.random() * 5).toFixed(1)}s;--dx:${Math.round((Math.random() - 0.5) * 80)}px;width:${2 + Math.random() * 2}px;height:${2 + Math.random() * 2}px`;
-      dust.appendChild(s);
-    }
-  }
-
-  if (!reduce) {
-    const mm = gsap.matchMedia();
-    mm.add({ desk: '(min-width: 901px)', mob: '(max-width: 900px)' }, (ctx) => {
-      const mob = ctx.conditions.mob;
-      const lines = $$('.ql'), kick = $('.arena-q .kicker'), badges = $$('.abadge'), trophy = $('.trophy'), head = $('#arenaH');
-
-      gsap.set(['.spot-beam', '.spot-core', '.spot-src', '.spot-pool'], { opacity: 0 });
-      gsap.set(trophy, { opacity: 0, y: 70, scale: 0.9 });
-      gsap.set([kick, ...lines], { opacity: 0, y: 36, filter: 'blur(14px)' });
-      gsap.set(badges, { opacity: 0 });
-      gsap.set(head, { opacity: 0, y: 24 });
-
-      const tl = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: { trigger: '.arena', start: 'top top', end: () => '+=' + Math.round(window.innerHeight * 6), pin: true, scrub: 1, anticipatePin: 1, invalidateOnRefresh: true, refreshPriority: 1 },
-      });
-      // 1 — the light comes on, the trophy rises into it
-      tl.to('#hint', { opacity: 0, duration: 0.4 }, 0.1)
-        .to(['.spot-beam', '.spot-core'], { opacity: 1, duration: 1.1, ease: 'power2.in' }, 0.2)
-        .to(['.spot-src', '.spot-pool'], { opacity: 1, duration: 1.1 }, 0.2)
-        .to(trophy, { opacity: 1, y: 0, scale: 1, duration: 1.5, ease: 'power2.out' }, 0.7)
-        // 2 — the question
-        .to(kick, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power2.out' }, 2.2)
-        .to(lines[0], { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.9, ease: 'power2.out' }, 2.8)
-        .to(lines[1], { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.9, ease: 'power2.out' }, 3.6)
-        // 3 — hold, then the question clears
-        .to('.arena-q', { opacity: 0, y: -28, duration: 0.8, ease: 'power2.in' }, 5.4);
-
-      // 4 — the sport badges fly in, one by one
-      badges.forEach((b, i) => {
-        const left = i < 3;
-        tl.fromTo(b,
-          { x: () => (left ? -1 : 1) * window.innerWidth * 0.62, y: () => [-0.35, 0.05, 0.4][i % 3] * window.innerHeight, rotation: left ? -240 : 240, scale: 0.2, opacity: 0 },
-          { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: 1.1, ease: 'back.out(1.5)' }, 6.1 + i * 0.5);
-      });
-      tl.fromTo(head, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out' }, 9.3)
-        .to({}, { duration: 1.4 }, 10.2);
-
-      // phones: the trophy steps back a little so the badge grid has room
-      if (mob) tl.to(trophy, { scale: 0.9, y: -2, duration: 0.8, ease: 'power2.inOut' }, 5.6);
-    });
-  }
 
   /* ----------------------------------------------------------
      Upcoming
@@ -154,7 +102,7 @@
   }
   function renderUp(initial) {
     const list = UPCOMING.filter((t) => filter === 'all' || t.sport === filter);
-    $('#upGrid').innerHTML = list.map((t) => cardHTML(t, initial)).join('') || '<p class="note">No tournaments for this sport yet — check back soon.</p>';
+    $('#upGrid').innerHTML = list.map((t) => cardHTML(t, initial)).join('') || '<p class="note">No tournaments for this sport yet. Check back soon.</p>';
     if (!initial && !reduce) gsap.fromTo('#upGrid .t-card', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'power3.out', clearProps: 'transform,opacity' });
   }
   chips.addEventListener('click', (e) => {
@@ -190,7 +138,7 @@
     $('#profileCard').innerHTML = profile
       ? `<div class="who"><div class="avatar">${esc(profile.name.trim()[0] || 'P').toUpperCase()}</div><div><h3>${esc(profile.name)}</h3><p>Player since ${dShort(profile.since)} · ${esc(profile.phone)}</p></div></div>
          <div class="acct-actions"><a class="btn-solid" href="#upcoming">Find a tournament</a><button class="btn-ghost" id="signOut" type="button">Sign out</button></div>`
-      : `<h3 class="dk-t">Create your player profile</h3><p class="dk-s">Takes ten seconds. Saved on this device only (demo) — no password needed.</p>
+      : `<h3 class="dk-t">Create your player profile</h3><p class="dk-s">Takes ten seconds. Saved on this device only (demo). No password needed.</p>
          <form id="profileForm" novalidate>
            <label class="field"><span>Name</span><input name="name" autocomplete="name" placeholder="e.g. Aarav Reddy" required></label>
            <label class="field"><span>Phone / WhatsApp</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile number" required></label>
@@ -200,7 +148,7 @@
     // registrations
     $('#regsCard').innerHTML = `<h3 class="dk-t">My registrations</h3>` + (regs.length
       ? `<div class="reg-list">${regs.map((r) => `<div class="reg-item">${Badge(r.sport)}<div><b>${esc(r.title)}</b><small>${dLong(r.date)}${r.team ? ' · ' + esc(r.team) : ''}</small></div></div>`).join('')}</div>`
-      : `<p class="reg-empty">Nothing yet — pick a tournament above and your entries will show up here.</p>`);
+      : `<p class="reg-empty">Nothing yet. Pick a tournament above and your entries will show up here.</p>`);
 
     // achievements
     const ACH = [
@@ -214,7 +162,7 @@
 
     // records
     const next = regs.map((r) => new Date(r.date)).filter((d) => d >= new Date(new Date().setHours(0, 0, 0, 0))).sort((a, b) => a - b)[0];
-    $('#records').innerHTML = [[regs.length, 'Tournaments entered'], [uniq, 'Sports tried'], [next ? dShort(next) : '—', 'Next event']].map(([v, l]) => `<div class="rec"><b>${v}</b><small>${l}</small></div>`).join('');
+    $('#records').innerHTML = [[regs.length, 'Tournaments entered'], [uniq, 'Sports tried'], [next ? dShort(next) : 'None', 'Next event']].map(([v, l]) => `<div class="rec"><b>${v}</b><small>${l}</small></div>`).join('');
   }
 
   document.addEventListener('submit', (e) => {
@@ -223,7 +171,7 @@
     const f = new FormData(e.target), name = (f.get('name') || '').trim(), phone = (f.get('phone') || '').replace(/\D/g, '');
     if (!name || phone.length < 10) return toast('Enter your name and a 10-digit phone number');
     profile = { name, phone: phone.slice(-10), since: new Date().toISOString() };
-    store.set('xcs_profile', profile); renderAccount(); renderUp(false); toast('Profile created — Rookie badge unlocked');
+    store.set('xcs_profile', profile); renderAccount(); renderUp(false); toast('Profile created. Rookie badge unlocked');
   });
   document.addEventListener('click', (e) => {
     if (e.target.id !== 'signOut') return;

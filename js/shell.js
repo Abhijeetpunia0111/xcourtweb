@@ -70,8 +70,8 @@
 
   const mtl = gsap.timeline({ paused: true, defaults: { ease: 'power4.inOut' } });
   mtl.set(menu, { visibility: 'visible' }, 0)
-    .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0% round 0px 0px 56px 56px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', duration: 1.05 }, 0)
-    // opacity only — a transform on #page would break pinned sections (position: fixed)
+    .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.05 }, 0)
+    // opacity only - a transform on #page would break pinned sections (position: fixed)
     .fromTo(page, { opacity: 1 }, { opacity: 0.35, duration: 1.05 }, 0)
     .fromTo('#menuLinks li', { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.05, ease: 'power2.out' }, 0.3)
     .fromTo('#menuLinks .ml span', { yPercent: 118, rotate: 3 }, { yPercent: 0, rotate: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out' }, 0.32)

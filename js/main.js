@@ -1,5 +1,5 @@
 /* ==========================================================
-   Crosscourt Sports Club — landing page behaviour
+   Crosscourt Sports Club - landing page behaviour
    - hero carousel (14s per sport) synced with the booking card
    - full-screen menu animation
    - booking card (sport / court / date / duration / slots / price)
@@ -16,7 +16,7 @@
   gsap.registerPlugin(ScrollTrigger);
 
   /* ----------------------------------------------------------
-     CONFIG — edit these to match the business
+     CONFIG - edit these to match the business
   ---------------------------------------------------------- */
   const SLIDE_SECONDS = 14;               // length of each hero video / slide
   const WHATSAPP = '918019765511';
@@ -60,7 +60,7 @@
     {
       id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22],
       title: 'Lap after lap, effortless.',
-      sub: 'A temperature-controlled pool — open from early morning.',
+      sub: 'A temperature-controlled pool, open from early morning.',
       courts: [['Main Pool', 'Lap lanes']],
       tags: ['Temperature-controlled', 'Caps mandatory'],
       promo: ['Early-bird swimmer?', 'Morning laps start at 7 AM'],
@@ -194,7 +194,7 @@
     el.innerHTML = hrs.length ? hrs.map((h) => {
       const ok = slotAvailable(h), pk = isPeak(st.date, h);
       return `<button class="slot${h === st.start ? ' is-sel' : ''}${pk ? ' is-peak' : ''}" role="radio" aria-checked="${h === st.start}" data-h="${h}" title="${pk ? 'Peak' : 'Off-peak'}" ${ok ? '' : 'disabled'}>${h12(h)}</button>`;
-    }).join('') : '<p class="slots-empty">No more slots today — pick another date.</p>';
+    }).join('') : '<p class="slots-empty">No more slots today. Pick another date.</p>';
   }
 
   function renderTags() {
@@ -205,7 +205,7 @@
   const priceTween = { v: 0 };
   function renderPrice(animate = true) {
     const priceEl = $('#price'), toggle = $('#tgPrice'), cta = $('#bkCta');
-    if (st.start == null) { priceEl.textContent = '—'; toggle.textContent = '—'; $('#priceNote').textContent = 'No slot selected'; cta.disabled = true; return; }
+    if (st.start == null) { priceEl.textContent = 'N/A'; toggle.textContent = 'N/A'; $('#priceNote').textContent = 'No slot selected'; cta.disabled = true; return; }
     cta.disabled = false;
     const { total, label } = priceOf(st.start);
     $('#priceNote').textContent = `${label} · ${st.dur === 1 ? '1 hr' : st.dur + ' hrs'}`;
@@ -436,8 +436,8 @@
 
   const mtl = gsap.timeline({ paused: true, defaults: { ease: 'power4.inOut' } });
   mtl.set(menu, { visibility: 'visible' }, 0)
-    .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0% round 0px 0px 56px 56px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', duration: 1.05 }, 0)
-    // opacity only — a transform on #page would break the pinned story section (position: fixed)
+    .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.05 }, 0)
+    // opacity only - a transform on #page would break the pinned story section (position: fixed)
     .fromTo(page, { opacity: 1 }, { opacity: 0.35, duration: 1.05 }, 0)
     .fromTo('#menuLinks li', { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.05, ease: 'power2.out' }, 0.3)
     .fromTo('#menuLinks .ml span', { yPercent: 118, rotate: 3 }, { yPercent: 0, rotate: 0, duration: 1.1, stagger: 0.06, ease: 'expo.out' }, 0.32)
@@ -501,7 +501,7 @@
   gsap.to('.foot-word', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.foot', start: 'top bottom', end: 'bottom bottom', scrub: true } });
 
   /* ----------------------------------------------------------
-     Story: pinned section — lines fade in one by one, then the whole
+     Story: pinned section - lines fade in one by one, then the whole
      frame zooms through and fades out (echo frames trail behind it)
   ---------------------------------------------------------- */
   if (!reduceMotion && $('#story')) {
@@ -521,7 +521,7 @@
   /* ----------------------------------------------------------
      Boot
   ---------------------------------------------------------- */
-  // Late in the evening nothing is left today — start on the next day that has a free slot.
+  // Late in the evening nothing is left today - start on the next day that has a free slot.
   for (let i = 0; i < 14 && !slotHours().some(slotAvailable); i++) { st.date = new Date(st.date); st.date.setDate(st.date.getDate() + 1); }
   renderAll({ priceAnim: false });
   onMq();

@@ -1,5 +1,5 @@
 /* ==========================================================
-   Ribbon section — pinned, scroll-driven
+   Ribbon section - pinned, scroll-driven
    1. a gradient ribbon sweeps in, passes BEHIND the athlete, loops
       over their head, then crosses IN FRONT of them
    2. the leading end swells as it travels
@@ -11,7 +11,7 @@
    so the ribbon and the athlete always line up.
 
    Dev hook: add ?ribp=0.5 to the URL to freeze the animation at
-   50% (0–1) — handy for tuning the path.
+   50% (0–1) - handy for tuning the path.
    ========================================================== */
 (() => {
   'use strict';

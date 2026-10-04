@@ -6,7 +6,7 @@
 .rib { position: relative; height: 100svh; min-height: 560px; background: var(--ink); overflow: hidden; }
 .rib-stage { position: absolute; inset: 0; overflow: hidden; isolation: isolate; }
 
-/* court photo — athlete/ribbon sit on top */
+/* court photo - athlete/ribbon sit on top */
 .rib-bg { position: absolute; inset: 0; z-index: 0; background: url("../assets/img/athlete-bg.jpg") 50% 60% / cover; }
 .rib-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 85% at 50% 50%, rgba(4, 10, 20, 0) 45%, rgba(4, 10, 20, .45) 100%); }
 
@@ -21,7 +21,7 @@
 .rib-ath { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; overflow: visible; filter: drop-shadow(0 24px 34px rgba(0, 0, 0, .34)); will-change: transform, opacity; }
 .rib-front { z-index: 4; }
 
-/* the colour that takes over the whole window — same value as the ribbon head and the next section */
+/* the colour that takes over the whole window - same value as the ribbon head and the next section */
 .rib-flood { position: absolute; inset: 0; z-index: 6; background: var(--lime); clip-path: circle(0px at 100% 0); pointer-events: none; will-change: clip-path; }
 
 .rib-hint { position: absolute; z-index: 5; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; font-family: var(--ui); font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: rgba(255, 255, 255, .85); pointer-events: none; }
@@ -33,14 +33,13 @@
 .rib-copy .wrap { width: min(1440px, 100%); }
 .rib-copy a { pointer-events: auto; }
 .rn-k { font-family: var(--ui); font-size: 12px; letter-spacing: .24em; text-transform: uppercase; font-weight: 600; display: flex; align-items: center; gap: 12px; margin-bottom: 28px; color: rgba(7, 18, 13, .7); }
-.rn-k::before { content: ""; width: 34px; height: 1.5px; background: currentColor; }
 .rn-h { font-family: var(--ui); font-weight: 620; font-size: clamp(44px, 8.2vw, 148px); line-height: 1.02; letter-spacing: -.04em; margin: 0; }
 .rn-line { display: block; }
 .rn-line + .rn-line { font-family: var(--display); font-weight: 620; color: rgba(7, 18, 13, .52); }
 .rib-l + .rib-l { font-family: var(--display); }
 .rn-k, .rn-line, .rn-lead, .rn-cta { will-change: transform, opacity; }
 .rn-lead { max-width: 560px; margin: clamp(28px, 3.5vw, 52px) 0 0; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.5; color: rgba(7, 18, 13, .78); }
-.rn-cta { will-change: transform, opacity; display: inline-flex; align-items: center; height: 54px; padding: 0 28px; margin-top: 30px; border-radius: 999px; background: var(--ink); color: var(--cream); font-family: var(--ui); font-weight: 600; transition: transform .5s var(--ease), background .3s; }
+.rn-cta { will-change: transform, opacity; display: inline-flex; align-items: center; height: 54px; padding: 0 28px; margin-top: 30px; border-radius: 0; background: var(--ink); color: var(--cream); font-family: var(--ui); font-weight: 600; transition: transform .5s var(--ease), background .3s; }
 .rn-cta:hover { transform: translateY(-3px); background: #17301f; }
 
 @media (max-aspect-ratio: 1/1) {
