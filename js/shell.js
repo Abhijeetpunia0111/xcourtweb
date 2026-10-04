@@ -110,5 +110,5 @@
   window.addEventListener('load', () => ScrollTrigger.refresh());
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
 
-  window.XCS = { $, $$, reduce, lenis, scrollToY, lock, unlock };
+  window.XCS = { $, $$, reduce, lenis, scrollToY, lock, unlock, closeMenu, isMenuOpen: () => menuOpen };
 })();

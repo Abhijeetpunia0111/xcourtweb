@@ -18,20 +18,20 @@
   /* ----------------------------------------------------------
      CONFIG - edit these to match the business
   ---------------------------------------------------------- */
-  const SLIDE_SECONDS = 14;               // length of each hero video / slide
+  const SLIDE_SECONDS = 14;               // how long a slide WITHOUT a video stays; slides with a video last as long as the video
   const WHATSAPP = '918019765511';
   // Peak rule is an ASSUMPTION (the live site only says "peak / off-peak").
   const isPeak = (date, t) => date.getDay() === 0 || date.getDay() === 6 || t >= 17;
 
+  // Carousel order = array order (Swimming, Pickleball, Football, Tennis, Box Cricket).
   // Rates are [peak, off-peak] per hour, taken from xcourtsports.com (Pay & Play).
   const SPORTS = [
     {
-      id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22],
-      title: 'Own the baseline.',
-      sub: 'Four ITF-standard courts and a dedicated center court.',
-      courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']],
-      tags: ['ITF-standard', 'Open 11 AM – 10 PM'],
-      promo: ['First time on the court?', 'Ask about our coached intro sessions'],
+      id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22],
+      title: 'Lap after lap, effortless.',
+      sub: 'A temperature-controlled pool, open from early morning.',
+      courts: [['Main Pool', 'Lap lanes']],
+      tags: ['Temperature-controlled', 'Caps mandatory'],
     },
     {
       id: 'pickleball', name: 'Pickleball', rate: [750, 500], open: [7, 22],
@@ -39,15 +39,6 @@
       sub: 'Twelve semi-indoor courts, built for fast, social rallies.',
       courts: Array.from({ length: 12 }, (_, i) => ['Court ' + String(i + 1).padStart(2, '0'), 'Semi-indoor']),
       tags: ['Semi-indoor', 'Max 4 players'],
-      promo: ['New to pickleball?', 'Grab a paddle and join an open session'],
-    },
-    {
-      id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22],
-      title: 'Box cricket, after dark.',
-      sub: 'A netted arena for quick, high-energy games with your crew.',
-      courts: [['Box Cricket Arena', 'Netted']],
-      tags: ['Netted arena', 'Turf surface'],
-      promo: ['Got a team?', 'Book the arena for the whole squad'],
     },
     {
       id: 'football', name: 'Football', rate: [1250, 1000], open: [7, 22],
@@ -55,15 +46,20 @@
       sub: 'Box-football turf with the pace of a proper match.',
       courts: [['Box Football Arena', 'Turf']],
       tags: ['Floodlit turf', 'No metal cleats'],
-      promo: ['Kick-about with friends?', 'Lock your weekly game in advance'],
     },
     {
-      id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22],
-      title: 'Lap after lap, effortless.',
-      sub: 'A temperature-controlled pool, open from early morning.',
-      courts: [['Main Pool', 'Lap lanes']],
-      tags: ['Temperature-controlled', 'Caps mandatory'],
-      promo: ['Early-bird swimmer?', 'Morning laps start at 7 AM'],
+      id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22],
+      title: 'Own the baseline.',
+      sub: 'Four ITF-standard courts and a dedicated center court.',
+      courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']],
+      tags: ['ITF-standard', 'Open 11 AM – 10 PM'],
+    },
+    {
+      id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22],
+      title: 'Box cricket, after dark.',
+      sub: 'A netted arena for quick, high-energy games with your crew.',
+      courts: [['Box Cricket Arena', 'Netted']],
+      tags: ['Netted arena', 'Turf surface'],
     },
   ];
   const N = SPORTS.length;
@@ -132,12 +128,10 @@
   slidesEl.innerHTML = SPORTS.map((sp, i) => `
     <article class="slide${i === 0 ? ' is-active' : ''}" data-i="${i}" role="group" aria-roledescription="slide" aria-label="${sp.name}">
       <div class="slide-art">${art(sp)}</div>
-      <video muted playsinline loop preload="none" data-src="assets/video/${sp.id}.mp4"></video>
+      <video playsinline loop preload="none" data-src="assets/video/${sp.id}.mp4"></video>
     </article>`).join('');
-  $('#promoArt').innerHTML = SPORTS.map((sp, i) => art(sp, 'p' + i, true, `class="${i === 0 ? 'on' : ''}"`)).join('');
 
   const slideEls = $$('.slide', slidesEl);
-  const promoSvgs = $$('#promoArt > *');
 
   /* ----------------------------------------------------------
      Booking state
@@ -287,7 +281,7 @@
   $('#doneBack').addEventListener('click', () => { done.classList.remove('is-on'); done.setAttribute('aria-hidden', 'true'); holds.delete('done'); syncHold(); });
 
   /* ---------- mobile sheet ---------- */
-  const booking = $('#book'), bkToggle = $('#bkToggle');
+  const booking = $('#bookCard'), bkToggle = $('#bkToggle');
   function setSheet(open) {
     booking.classList.toggle('is-collapsed', !open);
     bkToggle.setAttribute('aria-expanded', String(open));
@@ -304,29 +298,114 @@
   let cur = 0, busy = false, queued = null, progress = null, userPaused = reduceMotion, heroOut = false;
   const holds = new Set();           // reasons autoplay is held (hover, focus, open menu…)
   const frame = $('#heroFrame');
+  frame.addEventListener('scroll', () => { frame.scrollTop = 0; frame.scrollLeft = 0; });   // overflow:hidden boxes can still be scrolled by anchors / focus — never let the hero drift
 
   function syncHold() {
     $$('.dd').some((d) => d.classList.contains('is-open')) ? holds.add('dd') : holds.delete('dd');
     frame.classList.toggle('is-paused', userPaused);
     if (!progress) return;
     (userPaused || heroOut || holds.size || menuOpen) ? progress.pause() : progress.resume();
+    syncVideo();
   }
+
+  /* ---------- hero video + sound ----------
+     Sound is ON by default. Browsers refuse unmuted autoplay until the visitor has interacted with the page, so if the
+     first attempt is refused the video plays muted and the sound switches on at the first click / tap / key press. */
+  let soundOn = true;
+  const muteBtn = $('#muteBtn');
+  const curVideo = () => $('video', slideEls[cur]);
+  const isReady = (v) => v && v.classList.contains('is-ready');
+
+  function paintSound() {
+    const v = curVideo(), show = isReady(v);
+    muteBtn.classList.toggle('is-hidden', !show);                       // nothing to mute on slides without a video
+    frame.classList.toggle('has-video', !!v && v.classList.contains('is-shown'));
+    const audible = show && !v.muted && !v.paused;
+    muteBtn.classList.toggle('is-muted', !audible);
+    muteBtn.setAttribute('aria-pressed', String(audible));
+    const txt = audible ? 'Mute sound' : (soundOn ? 'Tap for sound' : 'Unmute sound');
+    muteBtn.setAttribute('aria-label', txt); muteBtn.setAttribute('title', txt);
+  }
+  // Muted autoplay is always allowed; UNMUTED autoplay only after the visitor has interacted with the page. Starting unmuted
+  // and retrying muted (the old way) raced with other play calls and could leave the clip paused on its first frame after a reload.
+  let gestured = false;
+  const canHearSound = () => navigator.userActivation ? navigator.userActivation.hasBeenActive : gestured;
+  function playVideo(v) {
+    v.muted = !(soundOn && canHearSound());
+    const pr = v.play();
+    if (pr) pr.catch(() => { v.muted = true; v.play().catch(() => {}); paintSound(); });   // last resort: muted
+  }
+  function fadeIn(v) { v.volume = 0; gsap.to(v, { volume: 1, duration: 1.2, ease: 'power1.in', overwrite: true }); }
+
+  // attach listeners and start downloading (without playing)
+  function prepareVideo(v) {
+    if (v.dataset.tried) return;
+    v.dataset.tried = '1';
+    v.addEventListener('loadeddata', () => {
+      v.classList.add('is-ready');
+      if (slideEls[cur] === v.closest('.slide')) { fadeIn(v); playVideo(v); startProgress(cur, slideSeconds(cur)); }   // slide lasts as long as the clip
+      paintSound();
+    });
+    v.addEventListener('playing', () => { v.classList.add('is-shown'); paintSound(); }, { once: true });
+    v.addEventListener('canplaythrough', () => { if (slideEls[cur] === v.closest('.slide')) warmNext(); }, { once: true });
+    v.addEventListener('error', () => v.remove(), { once: true });
+    ['volumechange', 'play', 'pause'].forEach((e) => v.addEventListener(e, paintSound));
+    v.preload = 'auto';
+    v.src = v.dataset.src;
+    v.load();                       // preload="none" would otherwise never fetch
+  }
+  // once the current clip can play through, quietly fetch the next slide's clip so it starts instantly
+  function warmNext() { const nv = $('video', slideEls[(cur + 1) % N]); if (nv) prepareVideo(nv); }
 
   function startVideo(i) {
     const v = $('video', slideEls[i]); if (!v) return;
-    if (!v.dataset.tried) {
-      v.dataset.tried = '1';
-      v.addEventListener('loadeddata', () => { v.classList.add('is-ready'); v.play().catch(() => {}); });
-      v.addEventListener('error', () => v.remove(), { once: true });
-      v.src = v.dataset.src;
-    } else if (v.classList.contains('is-ready')) { v.currentTime = 0; v.play().catch(() => {}); }
+    if (!v.dataset.tried) prepareVideo(v);
+    else if (isReady(v)) { v.currentTime = 0; fadeIn(v); playVideo(v); }
   }
-  const stopVideo = (i) => { const v = $('video', slideEls[i]); if (v) v.pause(); };
+  function stopVideo(i) { const v = $('video', slideEls[i]); if (v) { gsap.killTweensOf(v); v.pause(); v.volume = 1; } }
 
-  function startProgress(i) {
+  // the outgoing slide's audio fades out while the new one wipes in
+  const fadeOut = (i) => { const v = $('video', slideEls[i]); if (v && !v.paused) gsap.to(v, { volume: 0, duration: 0.9, ease: 'power1.out', overwrite: true }); };
+
+  // first real interaction turns the sound on if the browser refused it earlier
+  const GESTURES = ['pointerup', 'mousedown', 'click', 'keydown', 'touchend'];
+  function unlockSound(e) {
+    gestured = true;
+    if (e.target.closest && e.target.closest('#muteBtn')) return;
+    if (!soundOn) return;
+    const v = curVideo();
+    if (!isReady(v) || heroOut) return;
+    if (!v.muted && !v.paused) return dropUnlock();
+    v.muted = false;
+    v.play().then(() => { dropUnlock(); paintSound(); }).catch(() => { v.muted = true; v.play().catch(() => {}); });
+  }
+  const dropUnlock = () => GESTURES.forEach((g) => removeEventListener(g, unlockSound, true));
+  GESTURES.forEach((g) => addEventListener(g, unlockSound, { capture: true, passive: true }));
+
+  muteBtn.addEventListener('click', () => {
+    const v = curVideo(); if (!isReady(v)) return;
+    const turnOn = v.muted || v.paused;
+    soundOn = turnOn; v.muted = !turnOn;
+    if (turnOn) { v.volume = 1; v.play().catch(() => { v.muted = true; }); dropUnlock(); }
+    paintSound();
+  });
+
+  // silence + pause the video when the hero is off-screen or the tab is hidden
+  function syncVideo() {
+    const v = curVideo(); if (!isReady(v)) return;
+    if (heroOut || document.hidden) v.pause(); else if (v.paused) playVideo(v);
+  }
+  document.addEventListener('visibilitychange', syncVideo);
+
+  // How long a slide stays: the video's own length when it has one (any length), otherwise SLIDE_SECONDS.
+  function slideSeconds(i, elapsed = 0) {
+    const v = $('video', slideEls[i]);
+    return isReady(v) && isFinite(v.duration) && v.duration > 1 ? Math.max(1, v.duration - elapsed) : SLIDE_SECONDS;
+  }
+  function startProgress(i, seconds = slideSeconds(i)) {
     if (progress) progress.kill();
-    // invisible timer: advances the carousel after SLIDE_SECONDS (paused while the visitor is interacting)
-    progress = gsap.to({}, { duration: SLIDE_SECONDS, onComplete: () => goTo(cur + 1, 1) });
+    // invisible timer: advances the carousel when the slide's video ends (paused while the visitor is interacting)
+    progress = gsap.to({}, { duration: seconds, onComplete: () => goTo(cur + 1, 1) });
     syncHold();
   }
 
@@ -341,9 +420,6 @@
     swapText($('#heroEyebrow'), sp.name, { delay: 0.04 });
     swapText($('#heroSub'), sp.sub, { delay: 0.12 });
     gsap.to(t, { yPercent: -118, duration: reduceMotion ? 0.01 : 0.55, ease: 'power3.in', overwrite: true, onComplete: () => { t.textContent = sp.title; gsap.fromTo(t, { yPercent: 118 }, { yPercent: 0, duration: reduceMotion ? 0.01 : 1.1, ease: 'expo.out' }); } });
-    swapText($('#promoTitle'), sp.promo[0], { y: 8 });
-    swapText($('#promoSub'), sp.promo[1], { y: 8, delay: 0.06 });
-    promoSvgs.forEach((s, i) => s.classList.toggle('on', i === n));
   }
 
   function setSport(n) {
@@ -362,6 +438,8 @@
     const outArt = $('.slide-art', out), inArt = $('.slide-art', inn);
     const prev = cur;
 
+    fadeOut(cur);
+    cur = n;                        // logical index flips first so the new slide's video is "current"
     startVideo(n);
     startProgress(n);
     setCopy(n);
@@ -389,7 +467,7 @@
       .to(outArt, { xPercent: -16 * dir, scale: 1.1, duration: dur }, 0);
     // slow settle ("Ken Burns") runs on its own so it doesn't hold the transition lock
     gsap.fromTo(inArt, { scale: 1.32, xPercent: 9 * dir }, { scale: 1.02, xPercent: 0, duration: reduceMotion ? 0.01 : SLIDE_SECONDS + 2, ease: 'expo.out' });
-    cur = n;   // logical index flips immediately so booking / progress agree
+    paintSound();
   }
 
   // controls
@@ -463,6 +541,12 @@
     syncHold();
   }
   menuBtn.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
+  // shared helpers for js/bookpanel.js (same shape as the sub-pages' shell.js)
+  window.XCS = Object.assign(window.XCS || {}, {
+    scrollToY, closeMenu, isMenuOpen: () => menuOpen,
+    lock: () => (lenis ? lenis.stop() : (document.body.style.overflow = 'hidden')),
+    unlock: () => (lenis ? lenis.start() : (document.body.style.overflow = '')),
+  });
 
   /* ----------------------------------------------------------
      In-page links (menu + CTAs)
@@ -530,8 +614,6 @@
   const heroT = $('#heroTitle .t');
   heroT.textContent = SPORTS[0].title;
   $('#heroSub').textContent = SPORTS[0].sub;
-  $('#promoTitle').textContent = SPORTS[0].promo[0];
-  $('#promoSub').textContent = SPORTS[0].promo[1];
   $('#heroEyebrow').textContent = SPORTS[0].name;
   gsap.fromTo($('.slide-art', slideEls[0]), { scale: 1.3 }, { scale: 1.02, duration: SLIDE_SECONDS + 2, ease: 'expo.out' });
   startProgress(0);
@@ -547,9 +629,13 @@
   }
 
   // arriving from another page with a hash (e.g. tournaments → index.html#facilities)
+  // NB: nothing in the page has id="book" on purpose — the booking card lives inside the overflow:hidden hero,
+  // and a native jump to it scrolls the hero's contents sideways/upwards (the "broken layout" bug).
   window.addEventListener('load', () => {
     const h = location.hash; if (!h || h.length < 2) return;
     const t = $(h === '#book' ? '#top' : h); if (!t) return;
-    setTimeout(() => (h === '#book' ? scrollToY(0) : scrollToY(t, { offset: -40 })), 300);
+    setTimeout(() => {
+      if (h === '#book') { scrollToY(0); pulseBooking(); } else scrollToY(t, { offset: -40 });
+    }, 300);
   });
 })();

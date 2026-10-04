@@ -1,0 +1,203 @@
+/* ==========================================================
+   Booking panel — opens from the top (like the menu) on every
+   "Book a court" link, on every page, EXCEPT while the home-page
+   hero carousel is on screen (there the hero's own booking card is used).
+
+   Left:  sport + court        Right: date + duration + start time
+   Same rates / peak rule / simulated availability as the hero card.
+   (Config below mirrors SPORTS / isPeak / isBooked in js/main.js — keep them in sync.)
+   ========================================================== */
+(() => {
+  'use strict';
+
+  /* ---------- config (mirror of main.js) ---------- */
+  const WHATSAPP = '918019765511';
+  const isPeak = (date, t) => date.getDay() === 0 || date.getDay() === 6 || t >= 17;
+  const SPORTS = [
+    { id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22], courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']] },
+    { id: 'pickleball', name: 'Pickleball', rate: [750, 500], open: [7, 22], courts: Array.from({ length: 12 }, (_, i) => ['Court ' + String(i + 1).padStart(2, '0'), 'Semi-indoor']) },
+    { id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22], courts: [['Box Cricket Arena', 'Netted']] },
+    { id: 'football', name: 'Football', rate: [1250, 1000], open: [7, 22], courts: [['Box Football Arena', 'Turf']] },
+    { id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22], courts: [['Main Pool', 'Lap lanes']] },
+  ];
+  const DURS = [1, 1.5, 2];
+
+  /* ---------- helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
+  const h12 = (h) => `${Math.floor(h) % 12 || 12}${h % 1 ? ':30' : ''} ${h < 12 || h >= 24 ? 'AM' : 'PM'}`;
+  const sameDay = (a, b) => a.toDateString() === b.toDateString();
+  const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967295; };
+  const isBooked = (sp, court, date, hour) => {
+    const wk = date.getDay() === 0 || date.getDay() === 6;
+    const p = (hour >= 17 && hour < 21 ? 0.55 : 0.26) + (wk ? 0.1 : 0);
+    return hash(`${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
+  };
+  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(today0); d.setDate(d.getDate() + i); return d; });
+
+  const st = { sport: 0, court: 0, date: 0, dur: 1, start: null };
+  const sp = () => SPORTS[st.sport];
+  const date = () => days[st.date];
+
+  function slotHours() { const [o, c] = sp().open, a = []; for (let h = o; h + st.dur <= c; h++) a.push(h); return a; }
+  function available(h) {
+    const now = new Date();
+    if (sameDay(date(), now) && h * 60 <= now.getHours() * 60 + now.getMinutes()) return false;
+    for (let c = Math.floor(h); c < Math.ceil(h + st.dur); c++) if (isBooked(sp(), st.court, date(), c)) return false;
+    return true;
+  }
+  function priceOf(start) {
+    const [peak, off] = sp().rate; let total = 0, pk = 0, op = 0;
+    for (let t = start; t < start + st.dur - 1e-6; t += 0.5) { if (isPeak(date(), t)) { total += peak / 2; pk++; } else { total += off / 2; op++; } }
+    return { total, label: pk && op ? 'Peak + off-peak' : pk ? 'Peak' : 'Off-peak' };
+  }
+  function ensureStart() {
+    const hrs = slotHours();
+    if (st.start != null && hrs.includes(st.start) && available(st.start)) return;
+    const first = hrs.find(available); st.start = first == null ? null : first;
+  }
+  // start on the first day that still has a free slot (late evening → tomorrow)
+  for (let i = 0; i < 14 && !slotHours().some(available); i++) st.date = Math.min(13, st.date + 1);
+  ensureStart();
+
+  /* ---------- markup ---------- */
+  const root = document.createElement('div');
+  root.className = 'bp'; root.id = 'bp'; root.setAttribute('aria-hidden', 'true'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Book a court');
+  root.innerHTML = `
+    <div class="bp-back" data-bp-close></div>
+    <div class="bp-sheet" data-lenis-prevent>
+      <div class="bp-in" id="bpMain">
+        <header class="bp-head">
+          <div><h2>Book a court</h2><p>Gandipet · open 365 days · pay &amp; play</p></div>
+          <button class="bp-x" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+        </header>
+        <div class="bp-cols">
+          <section class="bp-l" aria-label="Sport and court">
+            <h3 class="bp-k"><b>01</b> Sport</h3>
+            <ul class="bp-sports" id="bpSports"></ul>
+            <h3 class="bp-k"><b>02</b> Court</h3>
+            <div class="bp-courts" id="bpCourts"></div>
+          </section>
+          <section class="bp-r" aria-label="Date and time">
+            <h3 class="bp-k"><b>03</b> Date</h3>
+            <div class="bp-dates" id="bpDates"></div>
+            <div class="bp-k bp-k-row"><h3><b>04</b> Start time</h3><div class="bp-dur" id="bpDur" role="group" aria-label="Duration"></div></div>
+            <div class="bp-slots" id="bpSlots" role="radiogroup" aria-label="Start time"></div>
+          </section>
+        </div>
+        <footer class="bp-foot">
+          <p class="bp-sum" id="bpSum"></p>
+          <div class="bp-pay"><div class="bp-price"><strong id="bpPrice">₹0</strong><span id="bpNote"></span></div>
+            <button class="bp-cta" id="bpCta" type="button">Confirm &amp; Pay <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+        </footer>
+      </div>
+      <div class="bp-done" id="bpDone" hidden>
+        <div class="bp-tick"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h3>Slot held for you</h3>
+        <dl id="bpDoneList"></dl>
+        <a class="bp-cta" id="bpWa" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a>
+        <button class="bp-back-btn" id="bpChange" type="button">Change booking</button>
+      </div>
+    </div>`;
+  document.body.appendChild(root);
+
+  /* ---------- render ---------- */
+  const dayLabel = (d, i) => (i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }));
+
+  function render() {
+    ensureStart();
+    $('#bpSports').innerHTML = SPORTS.map((s, i) => `<li><button type="button" class="bp-sport${i === st.sport ? ' is-on' : ''}" data-sport="${i}" style="--i:${i}"><em>0${i + 1}</em><span>${s.name}</span><small>from ${inr(s.rate[1])}/hr</small></button></li>`).join('');
+    $('#bpCourts').innerHTML = sp().courts.map((c, i) => `<button type="button" class="bp-chip${i === st.court ? ' is-on' : ''}" data-court="${i}">${c[0]}${c[1] ? `<small>${c[1]}</small>` : ''}</button>`).join('');
+    $('#bpDates').innerHTML = days.map((d, i) => {
+      const wk = d.getDay() === 0 || d.getDay() === 6;
+      return `<button type="button" class="bp-day${i === st.date ? ' is-on' : ''}${wk ? ' is-wk' : ''}" data-date="${i}"><small>${i === 0 ? 'Today' : d.toLocaleDateString('en-IN', { weekday: 'short' })}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString('en-IN', { month: 'short' })}</small></button>`;
+    }).join('');
+    $('#bpDur').innerHTML = DURS.map((d) => `<button type="button" class="${d === st.dur ? 'is-on' : ''}" data-dur="${d}" aria-pressed="${d === st.dur}">${d * 60} min</button>`).join('');
+    const hrs = slotHours();
+    $('#bpSlots').innerHTML = hrs.length ? hrs.map((h) => {
+      const ok = available(h), pk = isPeak(date(), h);
+      return `<button type="button" class="bp-slot${h === st.start ? ' is-on' : ''}" role="radio" aria-checked="${h === st.start}" data-h="${h}" ${ok ? '' : 'disabled'}>${h12(h)}<small>${pk ? 'Peak' : 'Off-peak'}</small></button>`;
+    }).join('') : '<p class="bp-empty">No slots for this duration.</p>';
+    paintFoot();
+  }
+  function paintFoot() {
+    const cta = $('#bpCta');
+    if (st.start == null) { $('#bpPrice').textContent = '—'; $('#bpNote').textContent = 'No free slot — try another day'; $('#bpSum').textContent = `${sp().name} · ${sp().courts[st.court][0]} · ${dayLabel(date(), st.date)}`; cta.disabled = true; return; }
+    cta.disabled = false;
+    const { total, label } = priceOf(st.start);
+    $('#bpPrice').textContent = inr(total);
+    $('#bpNote').textContent = `${label} · ${st.dur === 1 ? '1 hr' : st.dur + ' hrs'}`;
+    $('#bpSum').innerHTML = `<b>${sp().name}</b> · ${sp().courts[st.court][0]} · ${dayLabel(date(), st.date)} · ${h12(st.start)} – ${h12(st.start + st.dur)}`;
+  }
+
+  root.addEventListener('click', (e) => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.sport != null) { st.sport = +t.dataset.sport; st.court = 0; st.start = null; render(); }
+    else if (t.dataset.court != null) { st.court = +t.dataset.court; render(); }
+    else if (t.dataset.date != null) { st.date = +t.dataset.date; render(); }
+    else if (t.dataset.dur != null) { st.dur = +t.dataset.dur; render(); }
+    else if (t.dataset.h != null && !t.disabled) { st.start = +t.dataset.h; render(); }
+  });
+
+  /* ---------- confirm ---------- */
+  $('#bpCta').addEventListener('click', () => {
+    if (st.start == null) return;
+    const { total } = priceOf(st.start);
+    const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
+    const long = date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('#bpDoneList').innerHTML = [['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+    // TODO: replace with the real payment / booking API (same as the hero card). For now: confirm over WhatsApp.
+    const msg = `Hi Crosscourt! I'd like to book ${sp().name} (${sp().courts[st.court][0]}) on ${long}, ${time}. Estimated total ${inr(total)}.`;
+    $('#bpWa').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+    $('#bpMain').hidden = true; $('#bpDone').hidden = false; root.classList.add('is-done');
+  });
+  $('#bpChange').addEventListener('click', () => { $('#bpDone').hidden = true; $('#bpMain').hidden = false; root.classList.remove('is-done'); });
+
+  /* ---------- open / close ---------- */
+  const nav = $('#nav');
+  let isOpen = false, lastFocus = null, navHadOnMenu = false;
+  const xcs = () => window.XCS || {};
+
+  function open() {
+    if (isOpen) return; isOpen = true;
+    lastFocus = document.activeElement;
+    render();
+    root.setAttribute('aria-hidden', 'false'); root.classList.add('is-open');
+    if (nav) { navHadOnMenu = nav.classList.contains('on-menu'); nav.classList.add('on-menu'); }
+    if (xcs().lock) xcs().lock(); else document.body.style.overflow = 'hidden';
+    setTimeout(() => $('.bp-x', root).focus({ preventScroll: true }), reduce ? 0 : 500);
+  }
+  function close() {
+    if (!isOpen) return; isOpen = false;
+    root.setAttribute('aria-hidden', 'true'); root.classList.remove('is-open');
+    if (nav && !navHadOnMenu && !(nav.classList.contains('menu-open'))) nav.classList.remove('on-menu');
+    if (xcs().unlock) xcs().unlock(); else document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    setTimeout(() => { if (!isOpen && root.classList.contains('is-done')) { $('#bpDone').hidden = true; $('#bpMain').hidden = false; root.classList.remove('is-done'); } }, 900);
+  }
+  root.addEventListener('click', (e) => { if (e.target.closest('[data-bp-close]')) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  // opening the menu replaces the booking panel
+  document.addEventListener('click', (e) => { if (isOpen && e.target.closest('#menuBtn')) { root.classList.add('is-instant'); close(); setTimeout(() => root.classList.remove('is-instant'), 60); } }, true);
+
+  /* ---------- who opens it ---------- */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a'); if (!a) return;
+    const href = a.getAttribute('href') || '';
+    const wantsBooking = a.hasAttribute('data-book') || href === '#book' || /(^|\/)index\.html#book$/.test(href);
+    if (!wantsBooking) return;
+    const onHome = !!document.getElementById('heroFrame');
+    const heroOnScreen = onHome && window.scrollY < window.innerHeight * 0.5;
+    if (heroOnScreen) return;                                   // the hero keeps its own booking card
+    e.preventDefault(); e.stopPropagation();
+    if (isOpen) return;
+    const menuIsOpen = nav && nav.classList.contains('menu-open');
+    if (menuIsOpen && xcs().closeMenu) { xcs().closeMenu(); setTimeout(open, 560); } else open();
+  }, true);
+
+  window.XCS = Object.assign(window.XCS || {}, { openBooking: open, closeBooking: close });
+})();

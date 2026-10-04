@@ -29,7 +29,7 @@
   const cvBack = $('#ribBack'), cvFront = $('#ribFront');
   const ctxBack = cvBack.getContext('2d'), ctxFront = cvFront.getContext('2d');
   const svg = $('#ribAth'), flood = $('#ribFlood');
-  const titleEl = $('#ribTitle'), hint = $('#ribHint');
+  const titleEl = $('#ribTitle'), outlineEl = $('#ribOutline'), hint = $('#ribHint');
 
   /* ---------- look ---------- */
   // tail -> head. The head colour equals --lime so the flood and the next section are seamless.
@@ -190,8 +190,10 @@
     const p = easeIO(clamp((t - 0.03) / 0.57));
     const f = easeF(clamp((t - 0.60) / 0.22));
     drawRibbon(p); drawFlood(f);
-    titleEl.style.opacity = 1 - clamp((t - 0.20) / 0.25);
-    titleEl.style.transform = `translate3d(0,${(-t * 60).toFixed(1)}px,0)`;
+    [titleEl, outlineEl].forEach((el) => {              // the outline copy mirrors the headline exactly
+      el.style.opacity = 1 - clamp((t - 0.20) / 0.25);
+      el.style.transform = `translate3d(0,${(-t * 60).toFixed(1)}px,0)`;
+    });
     hint.style.opacity = 1 - clamp(t / 0.03);
     const q = clamp((t - 0.80) / 0.17);                   // copy: each piece fades up in turn
     copyEls.forEach((el, k) => {
@@ -200,6 +202,17 @@
       el.style.transform = `translate3d(0,${((1 - e) * 46).toFixed(1)}px,0)`;
       el.style.filter = el.classList.contains('rn-line') && e < 1 ? `blur(${((1 - e) * 12).toFixed(1)}px)` : '';
     });
+    placeMask();
+  }
+
+  // keep the outline copy's mask glued to the athlete image (same design-space rect as the <image> in the SVG)
+  const athImg = svg.querySelector('image');
+  function placeMask() {
+    const ix = +athImg.getAttribute('x'), iy = +athImg.getAttribute('y'), iw = +athImg.getAttribute('width'), ih = +athImg.getAttribute('height');
+    const dy = (parseFloat(gsap.getProperty(svg, 'y')) || 0) + lastT * 60;     // athlete's entrance offset + the headline's own drift
+    const size = `${(iw * view.k).toFixed(1)}px ${(ih * view.k).toFixed(1)}px`, pos = `${((ix - view.x0) * view.k).toFixed(1)}px ${((iy - view.y0) * view.k + dy).toFixed(1)}px`;
+    outlineEl.style.webkitMaskSize = outlineEl.style.maskSize = size;
+    outlineEl.style.webkitMaskPosition = outlineEl.style.maskPosition = pos;
   }
 
   function layout() { fitView(); buildRibbon(); render(lastT); }
@@ -214,13 +227,14 @@
   if (reduceMotion) { render(1); return; }
 
   // entrance (once, as the section scrolls into view)
-  const lines = titleEl.querySelectorAll('.rib-l > span');
+  const lines = document.querySelectorAll('#ribTitle .rib-l > span, #ribOutline .rib-l > span');
   gsap.set(lines, { yPercent: 110 });
   gsap.set(svg, { opacity: 0, y: 70 });
+  placeMask();
   ScrollTrigger.create({
     trigger: '.rib', start: 'top 82%', once: true,
     onEnter: () => {
-      gsap.to(svg, { opacity: 1, y: 0, duration: 1.5, ease: 'expo.out' });
+      gsap.to(svg, { opacity: 1, y: 0, duration: 1.5, ease: 'expo.out', onUpdate: placeMask });
       gsap.to(lines, { yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.1, delay: 0.1 });
     },
   });
