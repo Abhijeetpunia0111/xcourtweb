@@ -5,6 +5,7 @@
 
    Left:  sport + court        Right: date + duration + start time
    Same rates / peak rule / simulated availability as the hero card.
+   A link with data-book-sport="<sport id>" opens it with that sport selected.
    (Config below mirrors SPORTS / isPeak / isBooked in js/main.js — keep them in sync.)
    ========================================================== */
 (() => {
@@ -96,11 +97,22 @@
         </footer>
       </div>
       <div class="bp-done" id="bpDone" hidden>
+        <button class="bp-x bp-x-done" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
         <div class="bp-tick"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <h3>Slot held for you</h3>
         <dl id="bpDoneList"></dl>
         <a class="bp-cta" id="bpWa" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a>
         <button class="bp-back-btn" id="bpChange" type="button">Change booking</button>
+      </div>
+      <div class="bp-done bp-fail" id="bpFail" role="alert" hidden>
+        <button class="bp-x bp-x-done" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+        <div class="bp-tick bp-tick-x"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+        <h3 id="bpFailTitle" tabindex="-1">Payment failed</h3>
+        <p class="bp-fail-msg" id="bpFailMsg"></p>
+        <dl id="bpFailList"></dl>
+        <button class="bp-cta" id="bpRetry" type="button">Try payment again</button>
+        <a class="bp-cta bp-cta-ghost" id="bpWaAlt" href="#" target="_blank" rel="noopener">Book on WhatsApp instead</a>
+        <button class="bp-back-btn" id="bpFailChange" type="button">Change booking</button>
       </div>
     </div>`;
   document.body.appendChild(root);
@@ -143,19 +155,65 @@
     else if (t.dataset.h != null && !t.disabled) { st.start = +t.dataset.h; render(); }
   });
 
-  /* ---------- confirm ---------- */
-  $('#bpCta').addEventListener('click', () => {
-    if (st.start == null) return;
+  /* ---------- confirm + payment ----------
+     TODO: replace processPayment() with the real payment gateway call (Razorpay / PhonePe / ...). It must resolve
+     { ok: true } on success or { ok: false, reason: 'declined' | 'timeout' | 'cancelled' } on failure.
+     Demo: it always succeeds, unless the page is opened with ?payfail=1 (fail the first attempt, then succeed on retry),
+     ?payfail=2 (fail twice), ?payfail=always, or ?payfail=timeout / ?payfail=cancelled to see those messages. */
+  const FAIL_TEXT = {
+    declined: 'Your bank declined the payment. No money was charged.',
+    timeout: 'The payment timed out. If any amount was debited it will be refunded automatically.',
+    cancelled: 'The payment was cancelled. Nothing was charged and your slot is not booked yet.',
+  };
+  const demo = new URLSearchParams(location.search).get('payfail');
+  let failsLeft = demo === 'always' ? Infinity : /^\d+$/.test(demo || '') ? +demo : demo ? 1 : 0;
+  const demoReason = FAIL_TEXT[demo] ? demo : 'declined';
+  function processPayment() {
+    return new Promise((resolve) => setTimeout(() => {
+      if (failsLeft > 0) { failsLeft--; resolve({ ok: false, reason: demoReason }); } else resolve({ ok: true });
+    }, reduce ? 200 : 1700));
+  }
+
+  const ctaHTML = $('#bpCta').innerHTML;
+  const show = (id) => { ['bpMain', 'bpDone', 'bpFail'].forEach((k) => { $('#' + k).hidden = k !== id; }); root.classList.toggle('is-done', id !== 'bpMain'); };
+  function booking() {
     const { total } = priceOf(st.start);
     const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
     const long = date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    $('#bpDoneList').innerHTML = [['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-    // TODO: replace with the real payment / booking API (same as the hero card). For now: confirm over WhatsApp.
+    const rows = [['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]];
     const msg = `Hi Crosscourt! I'd like to book ${sp().name} (${sp().courts[st.court][0]}) on ${long}, ${time}. Estimated total ${inr(total)}.`;
-    $('#bpWa').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
-    $('#bpMain').hidden = true; $('#bpDone').hidden = false; root.classList.add('is-done');
-  });
-  $('#bpChange').addEventListener('click', () => { $('#bpDone').hidden = true; $('#bpMain').hidden = false; root.classList.remove('is-done'); });
+    return { rows, wa: `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}` };
+  }
+  const list = (rows) => rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+  let paying = false;
+  async function pay() {
+    if (st.start == null || paying) return;
+    paying = true;
+    const cta = $('#bpCta'), retry = $('#bpRetry');
+    [cta, retry].forEach((b) => { b.disabled = true; });
+    cta.innerHTML = '<span class="bp-spin" aria-hidden="true"></span> Processing payment…';
+    retry.innerHTML = '<span class="bp-spin" aria-hidden="true"></span> Processing payment…';
+    const b = booking();
+    let res;
+    try { res = await processPayment(b); } catch (err) { res = { ok: false, reason: 'timeout' }; }
+    paying = false;
+    cta.innerHTML = ctaHTML; retry.textContent = 'Try payment again'; [cta, retry].forEach((x) => { x.disabled = false; });
+    if (res.ok) {
+      $('#bpDoneList').innerHTML = list(b.rows); $('#bpWa').href = b.wa;
+      show('bpDone');
+    } else {
+      $('#bpFailMsg').textContent = FAIL_TEXT[res.reason] || FAIL_TEXT.declined;
+      $('#bpFailList').innerHTML = list([b.rows[0], b.rows[2], b.rows[3], b.rows[4]]);
+      $('#bpWaAlt').href = b.wa;
+      show('bpFail');
+      setTimeout(() => $('#bpFailTitle').focus({ preventScroll: true }), reduce ? 0 : 400);
+    }
+  }
+  $('#bpCta').addEventListener('click', pay);
+  $('#bpRetry').addEventListener('click', pay);
+  $('#bpChange').addEventListener('click', () => show('bpMain'));
+  $('#bpFailChange').addEventListener('click', () => show('bpMain'));
 
   /* ---------- open / close ---------- */
   const nav = $('#nav');
@@ -177,7 +235,7 @@
     if (nav && !navHadOnMenu && !(nav.classList.contains('menu-open'))) nav.classList.remove('on-menu');
     if (xcs().unlock) xcs().unlock(); else document.body.style.overflow = '';
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-    setTimeout(() => { if (!isOpen && root.classList.contains('is-done')) { $('#bpDone').hidden = true; $('#bpMain').hidden = false; root.classList.remove('is-done'); } }, 900);
+    setTimeout(() => { if (!isOpen && root.classList.contains('is-done')) show('bpMain'); }, 900);
   }
   root.addEventListener('click', (e) => { if (e.target.closest('[data-bp-close]')) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
@@ -195,6 +253,9 @@
     if (heroOnScreen) return;                                   // the hero keeps its own booking card
     e.preventDefault(); e.stopPropagation();
     if (isOpen) return;
+    // sport-specific links (data-book-sport="pickleball") open the panel with that sport already selected
+    const want = SPORTS.findIndex((x) => x.id === a.dataset.bookSport);
+    if (want >= 0 && want !== st.sport) { st.sport = want; st.court = 0; st.start = null; }
     const menuIsOpen = nav && nav.classList.contains('menu-open');
     if (menuIsOpen && xcs().closeMenu) { xcs().closeMenu(); setTimeout(open, 560); } else open();
   }, true);

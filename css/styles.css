@@ -265,6 +265,8 @@ ul, ol { list-style: none; }
 .fac-n { display: block; font-size: clamp(26px, 2.8vw, 42px); line-height: 1; letter-spacing: -.03em; font-weight: 700; color: var(--lime); margin-bottom: 8px; }
 .fac h3 { font-size: 20px; letter-spacing: -.02em; font-weight: 650; line-height: 1.1; }
 .fac p { color: rgba(255, 255, 255, .78); font-size: 13.5px; margin-top: 5px; max-width: 34ch; }
+.fac-book { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 9px 16px; border: 1.5px solid rgba(255, 255, 255, .85); color: #fff; font: 600 13px var(--ui); transition: background .35s, color .35s, border-color .35s; }
+.fac-book:hover { background: #fff; color: var(--ink); border-color: #fff; }
 .fac-stack { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .fac-stack .fac { flex: 1 1 0; min-height: 190px; }
 .f-tennis { grid-column: span 7; }

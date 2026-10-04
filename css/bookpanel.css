@@ -98,6 +98,16 @@
 .bp-done dl div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(7, 18, 13, .15); font-size: 15px; }
 .bp-done dt { color: rgba(7, 18, 13, .55); } .bp-done dd { margin: 0; font-weight: 700; }
 .bp-done .bp-cta { width: 100%; }
+/* close button on the result screens: same spot as the one in the booking header */
+.bp-x-done { position: absolute; top: calc(var(--nav-top) + 98px); right: calc(var(--pad) + 10px); }
+/* payment failed */
+.bp-tick-x { background: #f6c9c1; color: #a3281b; }
+.bp-fail-msg { margin: -2px 0 0; max-width: 44ch; font-size: 16px; line-height: 1.5; color: rgba(7, 18, 13, .72); }
+.bp-fail dl { margin-top: 2px; }
+.bp-cta-ghost { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+.bp-cta-ghost:hover { background: var(--ink); color: var(--paper); transform: translateY(-2px); }
+.bp-spin { width: 16px; height: 16px; border: 2px solid rgba(21, 22, 9, .25); border-top-color: #151609; animation: bpSpin .7s linear infinite; }
+@keyframes bpSpin { to { transform: rotate(360deg); } }
 .bp-back-btn { font: 650 13px var(--ui); text-decoration: underline; text-underline-offset: 4px; color: rgba(7, 18, 13, .7); }
 
 @media (max-width: 900px) {

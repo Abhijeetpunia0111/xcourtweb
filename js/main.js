@@ -474,7 +474,8 @@
   // controls
   $('#nextBtn').addEventListener('click', () => { goTo(cur + 1, 1); });
   $('#prevBtn').addEventListener('click', () => { goTo(cur - 1, -1); });
-  $('#playBtn').addEventListener('click', () => { userPaused = !userPaused; $('#playBtn').setAttribute('aria-label', userPaused ? 'Play autoplay' : 'Pause autoplay'); syncHold(); });
+  function setAutoplayPaused(on) { userPaused = on; $('#playBtn').setAttribute('aria-label', on ? 'Play autoplay' : 'Pause autoplay'); syncHold(); }
+  $('#playBtn').addEventListener('click', () => setAutoplayPaused(!userPaused));
 
   // keyboard + swipe
   document.addEventListener('keydown', (e) => {
@@ -561,6 +562,13 @@
     const id = a.getAttribute('href'); if (id === '#') return;
     const target = id === '#book' ? $('#top') : $(id); if (!target) return;
     e.preventDefault();
+    // Sport-specific booking: the hero button books the sport on screen; any [data-book-sport="<id>"] link books that sport.
+    // Either way the booking card switches to it and the carousel stops advancing so the choice sticks while the form is filled in.
+    if (id === '#book') {
+      const want = a.dataset.bookSport || (a.classList.contains('hero-cta') ? SPORTS[cur].id : '');
+      const idx = SPORTS.findIndex((sp) => sp.id === want);
+      if (idx >= 0) { if (idx !== cur) goTo(idx, idx > cur ? 1 : -1); setAutoplayPaused(true); }
+    }
     const go = () => {
       if (id === '#book' || id === '#top') { scrollToY(0); if (id === '#book') pulseBooking(); }
       else scrollToY(target, { offset: -40 });
