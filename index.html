@@ -118,7 +118,16 @@
           <div class="bk-card">
             <div class="bk-top">
               <h2 class="bk-title">Book a court</h2>
-              <span class="bk-loc">Gandipet</span>
+              <div class="dd dd-loc" data-dd="branch">
+                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="sr">Branch:</span>
+                  <svg class="dd-pin" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                  <span class="dd-v" id="vBranch">Gandipet</span>
+                  <span class="dd-km" id="vBranchKm"></span>
+                  <svg class="dd-chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="dd-menu" role="listbox" aria-label="Branch"></div>
+              </div>
             </div>
 
             <div class="bk-grid">
@@ -425,6 +434,7 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="js/scenes.js"></script>
+<script src="js/branches.js"></script>
 <script src="js/main.js"></script>
 <script src="js/ribbon.js"></script>
 <script src="js/fit.js"></script>

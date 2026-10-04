@@ -13,6 +13,7 @@
 
   /* ---------- config (mirror of main.js) ---------- */
   const WHATSAPP = '918019765511';
+  const Branches = window.XCSBranches;   // shared with the hero card (js/branches.js)
   const isPeak = (date, t) => date.getDay() === 0 || date.getDay() === 6 || t >= 17;
   const SPORTS = [
     { id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22], courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']] },
@@ -38,7 +39,7 @@
   const isBooked = (sp, court, date, hour) => {
     const wk = date.getDay() === 0 || date.getDay() === 6;
     const p = (hour >= 17 && hour < 21 ? 0.55 : 0.26) + (wk ? 0.1 : 0);
-    return hash(`${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
+    return hash(`${Branches.current().id}|${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
   };
   const today0 = new Date(); today0.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(today0); d.setDate(d.getDate() + i); return d; });
@@ -76,7 +77,12 @@
     <div class="bp-sheet" data-lenis-prevent>
       <div class="bp-in" id="bpMain">
         <header class="bp-head">
-          <div><h2>Book a court</h2><p>Gandipet · open 365 days · pay &amp; play</p></div>
+          <div class="bp-title"><h2>Book a court</h2><p id="bpWhere"></p></div>
+          <label class="bp-branch"><span class="sr">Branch</span>
+            <svg class="bp-pin" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <select id="bpBranch"></select>
+            <svg class="bp-chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </label>
           <button class="bp-x" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
         </header>
         <div class="bp-cols">
@@ -123,8 +129,16 @@
   /* ---------- render ---------- */
   const dayLabel = (d, i) => (i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }));
 
+  function paintBranch() {
+    const cur = Branches.index(), status = Branches.status();
+    $('#bpBranch').innerHTML = Branches.list.map((b, i) => `<option value="${i}"${i === cur ? ' selected' : ''}>${b.name}${Branches.dist(i) ? ' · ' + Branches.dist(i) : ''}</option>`).join('');
+    const near = status === 'locating' ? 'Finding the nearest branch…' : cur === Branches.nearest() ? '<b>Nearest to you</b>' : '';
+    $('#bpWhere').innerHTML = [near, 'open 365 days', 'pay &amp; play'].filter(Boolean).join(' · ');
+  }
+
   function render() {
     ensureStart();
+    paintBranch();
     $('#bpSports').innerHTML = SPORTS.map((s, i) => `<li><button type="button" class="bp-sport${i === st.sport ? ' is-on' : ''}" data-sport="${i}" style="--i:${i}"><span>${s.name}</span><small>from ${inr(s.rate[1])}/hr</small></button></li>`).join('');
     $('#bpCourts').innerHTML = sp().courts.map((c, i) => `<button type="button" class="bp-chip${i === st.court ? ' is-on' : ''}" data-court="${i}">${c[0]}${c[1] ? `<small>${c[1]}</small>` : ''}</button>`).join('');
     $('#bpDates').innerHTML = days.map((d, i) => {
@@ -141,12 +155,13 @@
   }
   function paintFoot() {
     const cta = $('#bpCta');
-    if (st.start == null) { $('#bpPrice').textContent = '—'; $('#bpNote').textContent = 'No free slot — try another day'; $('#bpSum').textContent = `${sp().name} · ${sp().courts[st.court][0]} · ${dayLabel(date(), st.date)}`; cta.disabled = true; return; }
+    const where = `${Branches.current().name} · ${sp().courts[st.court][0]}`;
+    if (st.start == null) { $('#bpPrice').textContent = '—'; $('#bpNote').textContent = 'No free slot — try another day or branch'; $('#bpSum').textContent = `${sp().name} · ${where} · ${dayLabel(date(), st.date)}`; cta.disabled = true; return; }
     cta.disabled = false;
     const { total, label } = priceOf(st.start);
     $('#bpPrice').textContent = inr(total);
     $('#bpNote').textContent = `${label} · ${st.dur === 1 ? '1 hr' : st.dur + ' hrs'}`;
-    $('#bpSum').innerHTML = `<b>${sp().name}</b> · ${sp().courts[st.court][0]} · ${dayLabel(date(), st.date)} · ${h12(st.start)} – ${h12(st.start + st.dur)}`;
+    $('#bpSum').innerHTML = `<b>${sp().name}</b> · ${where} · ${dayLabel(date(), st.date)} · ${h12(st.start)} – ${h12(st.start + st.dur)}`;
   }
 
   root.addEventListener('click', (e) => {
@@ -157,6 +172,7 @@
     else if (t.dataset.dur != null) { st.dur = +t.dataset.dur; render(); }
     else if (t.dataset.h != null && !t.disabled) { st.start = +t.dataset.h; render(); }
   });
+  $('#bpBranch').addEventListener('change', (e) => Branches.select(+e.target.value));   // redraws through Branches.onChange below
 
   /* ---------- confirm + payment ----------
      TODO: replace processPayment() with the real payment gateway call (Razorpay / PhonePe / ...). It must resolve
@@ -183,8 +199,9 @@
     const { total } = priceOf(st.start);
     const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
     const long = date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    const rows = [['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]];
-    const msg = `Hi Crosscourt! I'd like to book ${sp().name} (${sp().courts[st.court][0]}) on ${long}, ${time}. Estimated total ${inr(total)}.`;
+    const br = Branches.current().name;
+    const rows = [['Branch', br], ['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]];
+    const msg = `Hi Crosscourt! I'd like to book ${sp().name} (${sp().courts[st.court][0]}) at the ${br} branch on ${long}, ${time}. Estimated total ${inr(total)}.`;
     return { rows, wa: `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}` };
   }
   const list = (rows) => rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
@@ -207,7 +224,7 @@
       show('bpDone');
     } else {
       $('#bpFailMsg').textContent = FAIL_TEXT[res.reason] || FAIL_TEXT.declined;
-      $('#bpFailList').innerHTML = list([b.rows[0], b.rows[2], b.rows[3], b.rows[4]]);
+      $('#bpFailList').innerHTML = list(b.rows.filter(([k]) => k !== 'Court'));
       $('#bpWaAlt').href = b.wa;
       show('bpFail');
       setTimeout(() => $('#bpFailTitle').focus({ preventScroll: true }), reduce ? 0 : 400);
@@ -227,6 +244,7 @@
     if (isOpen) return; isOpen = true;
     lastFocus = document.activeElement;
     render();
+    Branches.locate();   // preselect the nearest branch (asks for location the first time; see js/branches.js)
     root.setAttribute('aria-hidden', 'false'); root.classList.add('is-open');
     if (nav) { navHadOnMenu = nav.classList.contains('on-menu'); nav.classList.add('on-menu'); }
     if (xcs().lock) xcs().lock(); else document.body.style.overflow = 'hidden';
@@ -241,6 +259,9 @@
     setTimeout(() => { if (!isOpen && root.classList.contains('is-done')) show('bpMain'); }, 900);
   }
   root.addEventListener('click', (e) => { if (e.target.closest('[data-bp-close]')) close(); });
+  // branch changed (here, in the hero card, or nearest located) → that branch's availability; status-only → just the picker.
+  // While closed there's nothing to do: open() renders.
+  Branches.onChange((moved) => { if (isOpen) (moved ? render : paintBranch)(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   // opening the menu replaces the booking panel
   document.addEventListener('click', (e) => { if (isOpen && e.target.closest('#menuBtn')) { root.classList.add('is-instant'); close(); setTimeout(() => root.classList.remove('is-instant'), 60); } }, true);

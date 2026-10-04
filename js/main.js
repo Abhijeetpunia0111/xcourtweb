@@ -20,6 +20,7 @@
   ---------------------------------------------------------- */
   const SLIDE_SECONDS = 14;               // how long a slide WITHOUT a video stays; slides with a video last as long as the video
   const WHATSAPP = '918019765511';
+  const Branches = window.XCSBranches;   // branch list + the selected / nearest branch (js/branches.js)
   // Peak rule is an ASSUMPTION (the live site only says "peak / off-peak").
   const isPeak = (date, t) => date.getDay() === 0 || date.getDay() === 6 || t >= 17;
 
@@ -186,10 +187,11 @@
   const DURS = [1, 1.5, 2];
   const curSport = () => SPORTS[st.sport];
 
+  // simulated availability, different at each branch
   const isBooked = (sp, court, date, hour) => {
     const wk = date.getDay() === 0 || date.getDay() === 6;
     const p = (hour >= 17 && hour < 21 ? 0.55 : 0.26) + (wk ? 0.1 : 0);
-    return hash(`${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
+    return hash(`${Branches.current().id}|${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
   };
   function slotAvailable(h) {
     const sp = curSport(), now = new Date();
@@ -216,7 +218,20 @@
   const dateList = () => Array.from({ length: 14 }, (_, i) => { const d = new Date(today0); d.setDate(d.getDate() + i); return d; });
   const dateLabel = (d) => sameDay(d, today0) ? 'Today' : (() => { const t = new Date(today0); t.setDate(t.getDate() + 1); return sameDay(d, t) ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); })();
 
+  const GEO = { idle: 'Find my nearest branch', locating: 'Finding your location…', failed: 'Location unavailable · Try again' };
+  function renderBranch() {
+    const near = Branches.nearest(), status = Branches.status();
+    const geo = status === 'done' || !navigator.geolocation ? '' : `<button class="dd-geo" type="button"${status === 'locating' ? ' disabled' : ''}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${GEO[status]}</button>`;
+    dd('branch').querySelector('.dd-menu').innerHTML = Branches.list.map((b, i) => {
+      const meta = [Branches.dist(i), i === near ? 'Nearest' : ''].filter(Boolean).join(' · ');
+      return opt(i, `<span class="dd-2"><span>${b.name}</span><small>${b.area}</small></span>${meta ? `<small>${meta}</small>` : ''}`, i === Branches.index(), i);
+    }).join('') + geo;
+    $('#vBranch').textContent = Branches.current().name;
+    $('#vBranchKm').textContent = Branches.dist(Branches.index()) && '· ' + Branches.dist(Branches.index());
+  }
+
   function renderMenus() {
+    renderBranch();
     dd('sport').querySelector('.dd-menu').innerHTML = SPORTS.map((s, i) => opt(i, `<span>${s.name}</span><small>from ${inr(s.rate[1])}</small>`, i === st.sport, i)).join('');
     dd('court').querySelector('.dd-menu').innerHTML = curSport().courts.map((c, i) => opt(i, `<span>${c[0]}</span>${c[1] ? `<small>${c[1]}</small>` : ''}`, i === st.court, i)).join('');
     dd('date').querySelector('.dd-menu').innerHTML = dateList().map((d, i) => {
@@ -284,10 +299,12 @@
       syncHold();
     });
     menu.addEventListener('click', (e) => {
+      if (e.target.closest('.dd-geo')) { Branches.locate(true); return; }   // menu stays open to show the result
       const o = e.target.closest('.dd-opt'); if (!o) return;
       const v = o.dataset.val, name = d.dataset.dd;
       d.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
       if (name === 'sport') { if (+v < N) goTo(+v, +v > st.sport ? 1 : -1); else { st.sport = +v; st.court = 0; renderAll({ swap: true }); } }
+      else if (name === 'branch') Branches.select(+v);                      // redraws through Branches.onChange below
       else {
         if (name === 'court') st.court = +v;
         if (name === 'date') st.date = dateList()[+v];
@@ -299,6 +316,15 @@
     });
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('.dd')) closeDD(); });
+
+  // A branch picked here or in the booking panel, or the nearest one once located → redraw with that branch's availability.
+  // Status-only changes ("Finding your location…") just redraw the branch menu: re-rendering the slots between a
+  // pointerdown and its click would swallow the click.
+  Branches.onChange((moved) => {
+    if (!moved) return renderBranch();
+    renderAll();
+    if (!reduceMotion) gsap.fromTo('#vBranch,#bkNext,#slots', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 });
+  });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDD(); if (menuOpen) closeMenu(); } });
 
   $('#slots').addEventListener('click', (e) => {
@@ -312,13 +338,13 @@
   const done = $('#bkDone');
   $('#bkCta').addEventListener('click', () => {
     if (st.start == null) return;
-    const sp = curSport(), { total } = priceOf(st.start);
+    const sp = curSport(), br = Branches.current(), { total } = priceOf(st.start);
     const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
     const dateStr = st.date.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    $('#doneList').innerHTML = [['Sport', sp.name], ['Court', sp.courts[st.court][0]], ['Date', dateLabel(st.date)], ['Time', time], ['Total', inr(total)]]
+    $('#doneList').innerHTML = [['Branch', br.name], ['Sport', sp.name], ['Court', sp.courts[st.court][0]], ['Date', dateLabel(st.date)], ['Time', time], ['Total', inr(total)]]
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
     // TODO: replace with a real payment / booking API. For now the booking is confirmed over WhatsApp.
-    const msg = `Hi Crosscourt! I'd like to book ${sp.name} (${sp.courts[st.court][0]}) on ${dateStr}, ${time}. Estimated total ${inr(total)}.`;
+    const msg = `Hi Crosscourt! I'd like to book ${sp.name} (${sp.courts[st.court][0]}) at the ${br.name} branch on ${dateStr}, ${time}. Estimated total ${inr(total)}.`;
     $('#doneWa').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
     done.classList.add('is-on'); done.setAttribute('aria-hidden', 'false'); holds.add('done'); syncHold();
     if (!reduceMotion) gsap.from('#bkDone > *', { y: 16, opacity: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out', delay: 0.1 });
@@ -536,6 +562,8 @@
   booking.addEventListener('pointerleave', () => { holds.delete('hover'); syncHold(); });
   booking.addEventListener('focusin', () => { holds.add('focus'); syncHold(); });
   booking.addEventListener('focusout', () => { holds.delete('focus'); syncHold(); });
+  // first touch of the booking card → ask for location so the nearest branch is preselected (no prompt on page load)
+  ['pointerdown', 'focusin'].forEach((ev) => booking.addEventListener(ev, () => Branches.locate(), { passive: true }));
 
   ScrollTrigger.create({ trigger: '#top', start: 'top bottom', end: 'bottom 20%', onToggle: (s) => { heroOut = !s.isActive; syncHold(); } });
 
