@@ -418,8 +418,8 @@ ul, ol { list-style: none; }
   .hero-title { font-size: clamp(32px, 9.5vw, 54px); }
   .hero-sub { display: none; }
   .eyebrow { margin-bottom: 14px; }
-
-  .booking { top: auto; right: 10px; left: 10px; bottom: 10px; width: auto; z-index: 30; }
+  
+  .booking { display: none; }
   .bk-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 14px 16px; border-radius: 0; background: var(--lime); color: #151609; margin-bottom: 0; box-shadow: 0 20px 50px -20px rgba(0, 0, 0, .7); }
   .bk-toggle-l { display: grid; text-align: left; line-height: 1.1; }
   .bk-toggle-l b { font-size: 19px; letter-spacing: -.03em; font-weight: 600; }

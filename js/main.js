@@ -182,186 +182,9 @@
   /* ----------------------------------------------------------
      Booking state
   ---------------------------------------------------------- */
-  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
-  const st = { sport: 0, court: 0, date: new Date(today0), dur: 1, start: null };
-  const DURS = [1, 1.5, 2];
-  const curSport = () => SPORTS[st.sport];
 
-  // simulated availability, different at each branch
-  const isBooked = (sp, court, date, hour) => {
-    const wk = date.getDay() === 0 || date.getDay() === 6;
-    const p = (hour >= 17 && hour < 21 ? 0.55 : 0.26) + (wk ? 0.1 : 0);
-    return hash(`${Branches.current().id}|${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
-  };
-  function slotAvailable(h) {
-    const sp = curSport(), now = new Date();
-    if (sameDay(st.date, now) && h * 60 <= now.getHours() * 60 + now.getMinutes()) return false;
-    for (let c = Math.floor(h); c < Math.ceil(h + st.dur); c++) if (isBooked(sp, st.court, st.date, c)) return false;
-    return true;
-  }
-  const slotHours = () => { const [o, c] = curSport().open, a = []; for (let h = o; h + st.dur <= c; h++) a.push(h); return a; };
-  function priceOf(start) {
-    const [peak, off] = curSport().rate; let total = 0, pk = 0, op = 0;
-    for (let t = start; t < start + st.dur - 1e-6; t += 0.5) { if (isPeak(st.date, t)) { total += peak / 2; pk++; } else { total += off / 2; op++; } }
-    return { total, label: pk && op ? 'Peak + off-peak' : pk ? 'Peak' : 'Off-peak' };
-  }
-  function ensureStart() {
-    const hrs = slotHours();
-    if (st.start != null && hrs.includes(st.start) && slotAvailable(st.start)) return;
-    const first = hrs.find(slotAvailable);
-    st.start = first == null ? null : first;
-  }
-
-  /* ---------- dropdown rendering ---------- */
-  const dd = (name) => $(`.dd[data-dd="${name}"]`);
-  const opt = (val, html, sel, i) => `<button class="dd-opt${sel ? ' is-sel' : ''}" role="option" aria-selected="${!!sel}" data-val="${val}" style="--i:${i}">${html}</button>`;
-  const dateList = () => Array.from({ length: 14 }, (_, i) => { const d = new Date(today0); d.setDate(d.getDate() + i); return d; });
-  const dateLabel = (d) => sameDay(d, today0) ? 'Today' : (() => { const t = new Date(today0); t.setDate(t.getDate() + 1); return sameDay(d, t) ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); })();
-
-  const GEO = { idle: 'Find my nearest branch', locating: 'Finding your location…', failed: 'Location unavailable · Try again' };
-  function renderBranch() {
-    const near = Branches.nearest(), status = Branches.status();
-    const geo = status === 'done' || !navigator.geolocation ? '' : `<button class="dd-geo" type="button"${status === 'locating' ? ' disabled' : ''}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${GEO[status]}</button>`;
-    dd('branch').querySelector('.dd-menu').innerHTML = Branches.list.map((b, i) => {
-      const meta = [Branches.dist(i), i === near ? 'Nearest' : ''].filter(Boolean).join(' · ');
-      return opt(i, `<span class="dd-2"><span>${b.name}</span><small>${b.area}</small></span>${meta ? `<small>${meta}</small>` : ''}`, i === Branches.index(), i);
-    }).join('') + geo;
-    $('#vBranch').textContent = Branches.current().name;
-    $('#vBranchKm').textContent = Branches.dist(Branches.index()) && '· ' + Branches.dist(Branches.index());
-  }
-
-  function renderMenus() {
-    renderBranch();
-    dd('sport').querySelector('.dd-menu').innerHTML = SPORTS.map((s, i) => opt(i, `<span>${s.name}</span><small>from ${inr(s.rate[1])}</small>`, i === st.sport, i)).join('');
-    dd('court').querySelector('.dd-menu').innerHTML = curSport().courts.map((c, i) => opt(i, `<span>${c[0]}</span>${c[1] ? `<small>${c[1]}</small>` : ''}`, i === st.court, i)).join('');
-    dd('date').querySelector('.dd-menu').innerHTML = dateList().map((d, i) => {
-      const wk = d.getDay() === 0 || d.getDay() === 6;
-      return opt(i, `<span class="d-w">${i === 0 ? 'Today' : d.toLocaleDateString('en-IN', { weekday: 'short' })}</span><span class="d-n">${d.getDate()}</span><span class="d-w">${d.toLocaleDateString('en-IN', { month: 'short' })}</span>`, sameDay(d, st.date), i).replace('class="dd-opt', `class="dd-opt${wk ? ' is-wk' : ''}`);
-    }).join('');
-    dd('dur').querySelector('.dd-menu').innerHTML = DURS.map((d, i) => opt(d, `<span>${d * 60} mins</span><small>${d === 1 ? '1 hr' : d + ' hrs'}</small>`, d === st.dur, i)).join('');
-  }
-
-  function renderSlots() {
-    const now = new Date(), today = sameDay(st.date, now);
-    // hide hours that have already started today; the rest wrap into a grid (no sideways scrolling)
-    const hrs = slotHours().filter((h) => !today || h * 60 > now.getHours() * 60 + now.getMinutes()), el = $('#slots');
-    el.innerHTML = hrs.length ? hrs.map((h) => {
-      const ok = slotAvailable(h), pk = isPeak(st.date, h);
-      return `<button class="slot${h === st.start ? ' is-sel' : ''}${pk ? ' is-peak' : ''}" role="radio" aria-checked="${h === st.start}" data-h="${h}" title="${pk ? 'Peak' : 'Off-peak'}" ${ok ? '' : 'disabled'}>${h12(h)}</button>`;
-    }).join('') : '<p class="slots-empty">No more slots today. Pick another date.</p>';
-  }
-
-  function renderTags() {
-    const first = slotHours().find(slotAvailable);
-    $('#bkNext').textContent = first == null ? 'Fully booked' : `Next free · ${h12(first)}`;
-  }
-
-  const priceTween = { v: 0 };
-  function renderPrice(animate = true) {
-    const priceEl = $('#price'), toggle = $('#tgPrice'), cta = $('#bkCta');
-    if (st.start == null) { priceEl.textContent = 'N/A'; toggle.textContent = 'N/A'; $('#priceNote').textContent = 'No slot selected'; cta.disabled = true; return; }
-    cta.disabled = false;
-    const { total, label } = priceOf(st.start);
-    $('#priceNote').textContent = `${label} · ${st.dur === 1 ? '1 hr' : st.dur + ' hrs'}`;
-    toggle.textContent = inr(total);
-    if (!animate || reduceMotion) { priceEl.textContent = inr(total); priceTween.v = total; return; }
-    gsap.to(priceTween, { v: total, duration: 0.6, ease: 'power3.out', overwrite: true, onUpdate: () => { priceEl.textContent = inr(priceTween.v); } });
-  }
-
-  function renderValues() {
-    $('#vSport').textContent = curSport().name;
-    $('#vCourt').textContent = curSport().courts[st.court][0];
-    $('#vDate').textContent = dateLabel(st.date);
-    $('#vDur').textContent = st.dur * 60 + ' mins';
-    $('#tgSport').textContent = curSport().name;
-  }
-
-  function renderAll({ swap = false, priceAnim = true } = {}) {
-    ensureStart(); renderMenus(); renderValues(); renderTags(); renderSlots(); renderPrice(priceAnim);
-    if (swap && !reduceMotion) gsap.fromTo('.booking .swap', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05, overwrite: true });
-  }
-
-  /* ---------- dropdown behaviour ---------- */
-  const dds = $$('.dd');
-  function closeDD(except) {
-    dds.forEach((d) => { if (d !== except && d.classList.contains('is-open')) { d.classList.remove('is-open'); d.querySelector('.dd-btn').setAttribute('aria-expanded', 'false'); } });
-    syncHold();
-  }
-  dds.forEach((d) => {
-    const btn = d.querySelector('.dd-btn'), menu = d.querySelector('.dd-menu');
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = !d.classList.contains('is-open');
-      closeDD(d);
-      d.classList.toggle('is-open', open);
-      btn.setAttribute('aria-expanded', String(open));
-      if (open) { const s = menu.querySelector('.is-sel'); if (s) menu.scrollTop = Math.max(0, s.offsetTop - 60); }
-      syncHold();
-    });
-    menu.addEventListener('click', (e) => {
-      if (e.target.closest('.dd-geo')) { Branches.locate(true); return; }   // menu stays open to show the result
-      const o = e.target.closest('.dd-opt'); if (!o) return;
-      const v = o.dataset.val, name = d.dataset.dd;
-      d.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
-      if (name === 'sport') { if (+v < N) goTo(+v, +v > st.sport ? 1 : -1); else { st.sport = +v; st.court = 0; renderAll({ swap: true }); } }
-      else if (name === 'branch') Branches.select(+v);                      // redraws through Branches.onChange below
-      else {
-        if (name === 'court') st.court = +v;
-        if (name === 'date') st.date = dateList()[+v];
-        if (name === 'dur') st.dur = +v;
-        renderAll();
-        if (name === 'court') gsap.fromTo('#vCourt,#bkNext', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 });
-      }
-      syncHold();
-    });
-  });
-  document.addEventListener('click', (e) => { if (!e.target.closest('.dd')) closeDD(); });
-
-  // A branch picked here or in the booking panel, or the nearest one once located → redraw with that branch's availability.
-  // Status-only changes ("Finding your location…") just redraw the branch menu: re-rendering the slots between a
-  // pointerdown and its click would swallow the click.
-  Branches.onChange((moved) => {
-    if (!moved) return renderBranch();
-    renderAll();
-    if (!reduceMotion) gsap.fromTo('#vBranch,#bkNext,#slots', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 });
-  });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDD(); if (menuOpen) closeMenu(); } });
-
-  $('#slots').addEventListener('click', (e) => {
-    const b = e.target.closest('.slot'); if (!b || b.disabled) return;
-    st.start = +b.dataset.h;
-    $$('.slot', $('#slots')).forEach((s) => { const on = s === b; s.classList.toggle('is-sel', on); s.setAttribute('aria-checked', on); });
-    renderPrice();
-  });
-
-  /* ---------- confirm ---------- */
-  const done = $('#bkDone');
-  $('#bkCta').addEventListener('click', () => {
-    if (st.start == null) return;
-    const sp = curSport(), br = Branches.current(), { total } = priceOf(st.start);
-    const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
-    const dateStr = st.date.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    $('#doneList').innerHTML = [['Branch', br.name], ['Sport', sp.name], ['Court', sp.courts[st.court][0]], ['Date', dateLabel(st.date)], ['Time', time], ['Total', inr(total)]]
-      .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-    // TODO: replace with a real payment / booking API. For now the booking is confirmed over WhatsApp.
-    const msg = `Hi Crosscourt! I'd like to book ${sp.name} (${sp.courts[st.court][0]}) at the ${br.name} branch on ${dateStr}, ${time}. Estimated total ${inr(total)}.`;
-    $('#doneWa').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
-    done.classList.add('is-on'); done.setAttribute('aria-hidden', 'false'); holds.add('done'); syncHold();
-    if (!reduceMotion) gsap.from('#bkDone > *', { y: 16, opacity: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out', delay: 0.1 });
-  });
-  $('#doneBack').addEventListener('click', () => { done.classList.remove('is-on'); done.setAttribute('aria-hidden', 'true'); holds.delete('done'); syncHold(); });
-
-  /* ---------- mobile sheet ---------- */
-  const booking = $('#bookCard'), bkToggle = $('#bkToggle');
-  function setSheet(open) {
-    booking.classList.toggle('is-collapsed', !open);
-    bkToggle.setAttribute('aria-expanded', String(open));
-    open ? holds.add('sheet') : holds.delete('sheet');
-    syncHold();
-  }
-  bkToggle.addEventListener('click', () => setSheet(booking.classList.contains('is-collapsed')));
-  const onMq = () => { if (!mqMobile.matches) { booking.classList.remove('is-collapsed'); holds.delete('sheet'); } else if (!holds.has('sheet')) booking.classList.add('is-collapsed'); syncHold(); };
-  mqMobile.addEventListener('change', onMq);
+    /* ---------- booking card (Leo Cal, filled in by cal.turfleo.com/v1/embed.js) ---------- */
+  const booking = $('#bookCard');
 
   /* ----------------------------------------------------------
      Hero carousel
@@ -493,11 +316,6 @@
     gsap.to(t, { yPercent: -118, duration: reduceMotion ? 0.01 : 0.55, ease: 'power3.in', overwrite: true, onComplete: () => { t.textContent = sp.title; gsap.fromTo(t, { yPercent: 118 }, { yPercent: 0, duration: reduceMotion ? 0.01 : 1.1, ease: 'expo.out' }); } });
   }
 
-  function setSport(n) {
-    st.sport = n; st.court = 0;
-    renderAll({ swap: true });
-  }
-
   function goTo(n, dir) {
     n = ((n % N) + N) % N;
     if (n === cur) return;
@@ -514,7 +332,6 @@
     startVideo(n);
     startProgress(n);
     setCopy(n);
-    setSport(n);
 
     gsap.killTweensOf(outArt);
     inn.classList.add('is-active');
@@ -562,8 +379,6 @@
   booking.addEventListener('pointerleave', () => { holds.delete('hover'); syncHold(); });
   booking.addEventListener('focusin', () => { holds.add('focus'); syncHold(); });
   booking.addEventListener('focusout', () => { holds.delete('focus'); syncHold(); });
-  // first touch of the booking card → ask for location so the nearest branch is preselected (no prompt on page load)
-  ['pointerdown', 'focusin'].forEach((ev) => booking.addEventListener(ev, () => Branches.locate(), { passive: true }));
 
   ScrollTrigger.create({ trigger: '#top', start: 'top bottom', end: 'bottom 20%', onToggle: (s) => { heroOut = !s.isActive; syncHold(); } });
 
@@ -633,20 +448,18 @@
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]'); if (!a) return;
     const id = a.getAttribute('href'); if (id === '#') return;
-    const target = id === '#book' ? $('#top') : $(id); if (!target) return;
-    e.preventDefault();
-    // Sport-specific booking: the hero button books the sport on screen; any [data-book-sport="<id>"] link books that sport.
-    // Either way the booking card switches to it and the carousel stops advancing so the choice sticks while the form is filled in.
+    // "Book a court" opens Leo Cal's booking pop-up (details + payment). The hero button books the
+    // sport on screen; data-book-sport="<sport name>" books that sport.
     if (id === '#book') {
-      const want = a.dataset.bookSport || (a.classList.contains('hero-cta') ? SPORTS[cur].id : '');
-      const idx = SPORTS.findIndex((sp) => sp.id === want);
-      if (idx >= 0 && idx < N) { if (idx !== cur) goTo(idx, idx > cur ? 1 : -1); setAutoplayPaused(true); }
-      else if (idx >= N) { st.sport = idx; st.court = 0; renderAll({ swap: true }); setAutoplayPaused(true); }
+      e.preventDefault();
+      const sport = a.dataset.bookSport || (a.classList.contains('hero-cta') ? SPORTS[cur].name : '');
+      const book = () => window.LeoCal && window.LeoCal.open(sport ? { sport } : {});
+      if (menuOpen) { closeMenu(); setTimeout(book, 520); } else book();
+      return;
     }
-    const go = () => {
-      if (id === '#book' || id === '#top') { scrollToY(0); if (id === '#book') pulseBooking(); }
-      else scrollToY(target, { offset: -40 });
-    };
+    const target = $(id); if (!target) return;
+    e.preventDefault();
+    const go = () => (id === '#top' ? scrollToY(0) : scrollToY(target, { offset: -40 }));
     if (menuOpen) { closeMenu(); setTimeout(go, 520); } else go();
   });
 
@@ -688,10 +501,7 @@
   /* ----------------------------------------------------------
      Boot
   ---------------------------------------------------------- */
-  // Late in the evening nothing is left today - start on the next day that has a free slot.
-  for (let i = 0; i < 14 && !slotHours().some(slotAvailable); i++) { st.date = new Date(st.date); st.date.setDate(st.date.getDate() + 1); }
-  renderAll({ priceAnim: false });
-  onMq();
+
   startVideo(0);
 
   const heroT = $('#heroTitle .t');
@@ -718,7 +528,7 @@
     const h = location.hash; if (!h || h.length < 2) return;
     const t = $(h === '#book' ? '#top' : h); if (!t) return;
     setTimeout(() => {
-      if (h === '#book') { scrollToY(0); pulseBooking(); } else scrollToY(t, { offset: -40 });
+      if (h === '#book') window.LeoCal && window.LeoCal.open(); else scrollToY(t, { offset: -40 });
     }, 300);
   });
 })();
