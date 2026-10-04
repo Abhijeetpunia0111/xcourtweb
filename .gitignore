@@ -1,0 +1,7 @@
+# build output (has the real Leo Cal key in it) — see tools/build.mjs
+dist/
+# local env vars, e.g. LEO_CAL_KEY
+.env
+.env*.local
+.vercel
+node_modules/
