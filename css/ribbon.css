@@ -12,7 +12,7 @@
 
 /* poster-style headline sitting BEHIND the athlete */
 .rib-title { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none;
-  font-family: var(--display); font-weight: 700; font-size: clamp(54px, 13.5vw, 240px); line-height: .88; letter-spacing: -.045em; text-transform: uppercase; color: #fff; text-shadow: 0 6px 60px rgba(0, 0, 0, .25); will-change: transform, opacity; }
+  font-family: var(--ui); font-weight: 800; font-size: clamp(54px, 12.5vw, 220px); line-height: .88; letter-spacing: -.045em; text-transform: uppercase; color: #fff; text-shadow: 0 6px 60px rgba(0, 0, 0, .25); will-change: transform, opacity; }
 .rib-l { display: block; overflow: hidden; padding: .04em .06em; }
 .rib-l > span { display: block; will-change: transform; }
 
@@ -34,9 +34,10 @@
 .rib-copy a { pointer-events: auto; }
 .rn-k { font-family: var(--ui); font-size: 12px; letter-spacing: .24em; text-transform: uppercase; font-weight: 600; display: flex; align-items: center; gap: 12px; margin-bottom: 28px; color: rgba(7, 18, 13, .7); }
 .rn-k::before { content: ""; width: 34px; height: 1.5px; background: currentColor; }
-.rn-h { font-family: var(--display); font-weight: 620; font-size: clamp(44px, 8.4vw, 150px); line-height: .95; letter-spacing: -.04em; margin: 0; }
+.rn-h { font-family: var(--ui); font-weight: 620; font-size: clamp(44px, 8.2vw, 148px); line-height: 1.02; letter-spacing: -.04em; margin: 0; }
 .rn-line { display: block; }
-.rn-line + .rn-line { color: rgba(7, 18, 13, .52); }
+.rn-line + .rn-line { font-family: var(--display); font-weight: 620; color: rgba(7, 18, 13, .52); }
+.rib-l + .rib-l { font-family: var(--display); }
 .rn-k, .rn-line, .rn-lead, .rn-cta { will-change: transform, opacity; }
 .rn-lead { max-width: 560px; margin: clamp(28px, 3.5vw, 52px) 0 0; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.5; color: rgba(7, 18, 13, .78); }
 .rn-cta { will-change: transform, opacity; display: inline-flex; align-items: center; height: 54px; padding: 0 28px; margin-top: 30px; border-radius: 999px; background: var(--ink); color: var(--cream); font-family: var(--ui); font-weight: 600; transition: transform .5s var(--ease), background .3s; }
