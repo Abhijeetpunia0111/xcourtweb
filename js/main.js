@@ -545,4 +545,11 @@
       .from('.booking', { x: 70, opacity: 0, duration: 1.4 }, 0.35)
       .from('.hero-foot > *', { y: 36, opacity: 0, duration: 1.2, stagger: 0.1 }, 0.55);
   }
+
+  // arriving from another page with a hash (e.g. tournaments → index.html#facilities)
+  window.addEventListener('load', () => {
+    const h = location.hash; if (!h || h.length < 2) return;
+    const t = $(h === '#book' ? '#top' : h); if (!t) return;
+    setTimeout(() => (h === '#book' ? scrollToY(0) : scrollToY(t, { offset: -40 })), 300);
+  });
 })();

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>document.documentElement.classList.add("js")</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tournaments — Crosscourt Sports Club</title>
+  <meta name="description" content="Do you have what it takes to be a champion? Register for tennis, pickleball, box cricket, football, swimming and table tennis tournaments at Crosscourt Sports Club, Hyderabad.">
+  <meta name="theme-color" content="#07120d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@300..800&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/tournaments.css">
+</head>
+<body class="page-tournaments">
+
+<!-- ============ Announcement bar (closeable) ============ -->
+<div class="bar" id="bar">
+  <p>Season is on — <strong>register your team</strong> for the next Crosscourt championship. <a href="index.html#pay-play">See rates</a></p>
+  <button class="bar-x" id="barClose" aria-label="Dismiss announcement">
+    <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<!-- ============ Header ============ -->
+<header class="nav" id="nav">
+  <div class="nav-l">
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">
+      <span class="burger" aria-hidden="true"><i></i><i></i></span>
+      <span class="menu-label" aria-hidden="true"><span>Menu</span><span>Close</span></span>
+      <span class="sr">Open menu</span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <a class="nav-link" href="index.html#book">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span>Book a court</span>
+    </a>
+  </div>
+
+  <a class="logo" href="index.html" aria-label="Crosscourt Sports Club — home">
+    <span class="logo-word">CROSSCOURT</span>
+    <span class="logo-sub">Sports · Hyderabad</span>
+  </a>
+
+  <div class="nav-r">
+    <a class="icon-btn" href="https://maps.google.com/?q=Crosscourt+Sports+Club+Gandipet+Hyderabad" target="_blank" rel="noopener" aria-label="Directions">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>
+    </a>
+    <a class="icon-btn" href="tel:+918019765511" aria-label="Call +91 80197 65511">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+    </a>
+    <a class="pill" href="index.html#book">Book court</a>
+  </div>
+</header>
+
+<!-- ============ Full-screen menu ============ -->
+<nav class="menu" id="menu" aria-label="Main menu" aria-hidden="true">
+  <div class="menu-in">
+    <ul class="menu-links" id="menuLinks">
+      <li><a href="index.html#book" data-scene="tennis" data-copy="Pick a sport, a slot and you're on court — in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
+      <li><a href="index.html#pay-play" data-scene="pickleball" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
+      <li><a href="index.html#membership" data-scene="swimming" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
+      <li><a href="index.html#facilities" data-scene="football" data-copy="Courts, turf, pool, gym and more — all under one roof."><span class="mi">04</span><span class="ml"><span>Facilities</span></span></a></li>
+      <li><a href="index.html#coaching" data-scene="tennis" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">05</span><span class="ml"><span>Coaching</span></span></a></li>
+      <li><a href="index.html#why" data-scene="cricket" data-copy="Why Hyderabad plays at Crosscourt."><span class="mi">06</span><span class="ml"><span>Why Crosscourt</span></span></a></li>
+      <li><a href="#top" aria-current="page" data-scene="football" data-copy="Open championships across every sport. Do you have what it takes?"><span class="mi">07</span><span class="ml"><span>Tournaments</span></span></a></li>
+      <li><a href="#contact" data-scene="pickleball" data-copy="Find us in Gandipet — or message us on WhatsApp."><span class="mi">08</span><span class="ml"><span>Contact</span></span></a></li>
+    </ul>
+
+    <aside class="menu-side">
+      <div class="menu-feature" id="menuFeature">
+        <div class="menu-art" id="menuArt"></div>
+        <p class="menu-copy" id="menuCopy">Game on. Nonstop playtime.</p>
+      </div>
+      <div class="menu-info">
+        <div><span class="k">Visit</span><p>Sy. No. 365, 366 &amp; 367, Vattinagulapalli Village, Gandipet, Hyderabad 500075</p></div>
+        <div><span class="k">Hours</span><p>Tennis 11 AM – 10 PM<br>All other sports 7 AM – 10 PM</p></div>
+        <div><span class="k">Talk to us</span><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="https://wa.me/918019765511" target="_blank" rel="noopener">WhatsApp</a> · <a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a></p></div>
+      </div>
+    </aside>
+  </div>
+</nav>
+
+<div id="page">
+<main>
+
+<!-- ============ ARENA: pinned trophy story ============ -->
+<section class="arena" id="top" aria-labelledby="arenaTitle">
+  <div class="arena-stage">
+
+    <div class="spot" aria-hidden="true">
+      <i class="spot-beam"></i><i class="spot-core"></i><i class="spot-src"></i><i class="spot-pool"></i>
+      <div class="dust-wrap" id="dust"></div>
+    </div>
+
+    <!-- glass + chrome trophy -->
+    <div class="trophy" aria-hidden="true">
+      <svg class="trophy-svg" viewBox="0 0 300 470" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="tChrome" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#454f5a"/><stop offset=".1" stop-color="#aab5c1"/><stop offset=".22" stop-color="#f6fafe"/><stop offset=".34" stop-color="#7f8b99"/><stop offset=".5" stop-color="#dbe2e9"/><stop offset=".66" stop-color="#69747f"/><stop offset=".82" stop-color="#ecf1f5"/><stop offset=".93" stop-color="#97a2ae"/><stop offset="1" stop-color="#3f4852"/>
+          </linearGradient>
+          <linearGradient id="tGold" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a5a16"/><stop offset=".2" stop-color="#f6d77c"/><stop offset=".4" stop-color="#b8821f"/><stop offset=".62" stop-color="#fff0b0"/><stop offset=".82" stop-color="#c2902c"/><stop offset="1" stop-color="#7a4c0f"/>
+          </linearGradient>
+          <linearGradient id="tGlassF" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#c4e6ff" stop-opacity=".5"/><stop offset=".45" stop-color="#7fb2da" stop-opacity=".16"/><stop offset="1" stop-color="#d4efff" stop-opacity=".38"/>
+          </linearGradient>
+          <linearGradient id="tGlassT" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/><stop offset="1" stop-color="#9ccaee" stop-opacity=".28"/>
+          </linearGradient>
+          <radialGradient id="tSphere" cx=".35" cy=".3" r=".8">
+            <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c7d0d9"/><stop offset="1" stop-color="#4c5560"/>
+          </radialGradient>
+          <linearGradient id="tInside" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0e13"/><stop offset="1" stop-color="#2b333d"/></linearGradient>
+          <linearGradient id="tSheenG" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="tBlur"><feGaussianBlur stdDeviation="6"/></filter>
+          <clipPath id="tCup"><path d="M52 62H248C248 150 214 214 150 226C86 214 52 150 52 62Z"/></clipPath>
+        </defs>
+
+        <ellipse cx="150" cy="444" rx="118" ry="9" fill="#000" opacity=".55" filter="url(#tBlur)"/>
+
+        <!-- glass plinth -->
+        <path d="M60 372L90 354H210L240 372Z" fill="url(#tGlassT)" stroke="#fff" stroke-opacity=".6" stroke-width="1"/>
+        <rect x="60" y="372" width="180" height="68" rx="6" fill="url(#tGlassF)" stroke="#fff" stroke-opacity=".5" stroke-width="1.2"/>
+        <path d="M74 376L108 376L82 436L74 436Z" fill="#fff" opacity=".22"/>
+        <path d="M128 376L142 376L116 436L102 436Z" fill="#fff" opacity=".12"/>
+        <rect x="60" y="432" width="180" height="8" rx="3" fill="#bfe3ff" opacity=".35"/>
+        <rect x="108" y="394" width="84" height="24" rx="3" fill="url(#tGold)" stroke="#6b430c" stroke-width=".8"/>
+        <text x="150" y="410" text-anchor="middle" font-family="Manrope, sans-serif" font-size="9" font-weight="800" letter-spacing="2.2" fill="#4a2d05">CHAMPION</text>
+
+        <!-- metal pedestal, stem, knot -->
+        <path d="M96 356H204L216 332H84Z" fill="url(#tChrome)"/>
+        <ellipse cx="150" cy="332" rx="66" ry="7" fill="url(#tChrome)"/>
+        <path d="M133 330H167C167 302 160 292 160 276H140C140 292 133 302 133 330Z" fill="url(#tChrome)"/>
+        <ellipse cx="150" cy="262" rx="19" ry="19" fill="url(#tSphere)"/>
+        <path d="M138 246H162L174 226H126Z" fill="url(#tChrome)"/>
+
+        <!-- handles -->
+        <path d="M58 84C8 80 4 158 72 174" fill="none" stroke="url(#tChrome)" stroke-width="13" stroke-linecap="round"/>
+        <path d="M242 84C292 80 296 158 228 174" fill="none" stroke="url(#tChrome)" stroke-width="13" stroke-linecap="round"/>
+        <path d="M58 84C14 82 10 150 70 168" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M242 84C286 82 290 150 230 168" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2.4" stroke-linecap="round"/>
+
+        <!-- cup -->
+        <path d="M52 62H248C248 150 214 214 150 226C86 214 52 150 52 62Z" fill="url(#tChrome)"/>
+        <g clip-path="url(#tCup)">
+          <rect x="40" y="108" width="220" height="15" fill="url(#tGold)"/>
+          <rect x="40" y="108" width="220" height="2" fill="#fff" opacity=".5"/>
+          <polygon points="150,128 158,146 178,148 163,160 168,180 150,170 132,180 137,160 122,148 142,146" fill="url(#tGold)" stroke="#6b430c" stroke-width=".8"/>
+          <path d="M64 70C68 140 98 190 132 208C102 178 84 132 82 70Z" fill="#fff" opacity=".5"/>
+          <path d="M226 72C224 120 208 160 186 188C212 160 234 120 238 72Z" fill="#fff" opacity=".22"/>
+          <rect x="-140" y="40" width="70" height="210" fill="url(#tSheenG)" transform="skewX(-18)">
+            <animateTransform attributeName="transform" type="translate" additive="sum" values="0 0;0 0;520 0;520 0" keyTimes="0;.35;.75;1" dur="6s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+        <ellipse cx="150" cy="62" rx="98" ry="15" fill="url(#tInside)" stroke="url(#tChrome)" stroke-width="6"/>
+        <ellipse cx="150" cy="60" rx="86" ry="9" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.5"/>
+
+        <!-- glints -->
+        <g transform="translate(96 104)"><path class="spark" style="--sd:0s" d="M0-12L2.4-2.4 12 0 2.4 2.4 0 12-2.4 2.4-12 0-2.4-2.4Z" fill="#fff"/></g>
+        <g transform="translate(210 150)"><path class="spark" style="--sd:1.1s" d="M0-9L1.8-1.8 9 0 1.8 1.8 0 9-1.8 1.8-9 0-1.8-1.8Z" fill="#fff"/></g>
+        <g transform="translate(60 392)"><path class="spark" style="--sd:2s" d="M0-8L1.6-1.6 8 0 1.6 1.6 0 8-1.6 1.6-8 0-1.6-1.6Z" fill="#fff"/></g>
+      </svg>
+    </div>
+
+    <div class="arena-q">
+      <p class="kicker">Crosscourt Championships</p>
+      <h1 class="q" id="arenaTitle"><span class="ql">Do you have what it takes</span><span class="ql">to be a <em>champion?</em></span></h1>
+    </div>
+
+    <ul class="abadges" id="abadges">
+      <li class="abadge" data-kind="tennis" data-name="Tennis"></li>
+      <li class="abadge" data-kind="pickleball" data-name="Pickleball"></li>
+      <li class="abadge" data-kind="cricket" data-name="Box Cricket"></li>
+      <li class="abadge" data-kind="football" data-name="Football"></li>
+      <li class="abadge" data-kind="swimming" data-name="Swimming"></li>
+      <li class="abadge" data-kind="tabletennis" data-name="Table Tennis"></li>
+    </ul>
+    <p class="arena-h" id="arenaH">Six sports. <span>One champion.</span></p>
+    <div class="scroll-hint" id="hint" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </div>
+</section>
+
+<!-- ============ UPCOMING ============ -->
+<section class="sec t-sec" id="upcoming">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Upcoming</p>
+      <h2>Pick your<br><span>arena.</span></h2>
+      <p class="lead">Open draws across every sport. Register now, we'll confirm your slot on WhatsApp.</p>
+    </header>
+    <div class="chips" id="chips" role="tablist" aria-label="Filter by sport"></div>
+    <div class="t-grid" id="upGrid"></div>
+    <p class="note">Sample fixtures, fees and prize pools — the club confirms final schedules.</p>
+  </div>
+</section>
+
+<!-- ============ ONGOING ============ -->
+<section class="sec live-sec" id="ongoing">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Ongoing</p>
+      <h2>Live<br><span>right now.</span></h2>
+      <p class="lead">Matches in progress on court. Come cheer from the stands.</p>
+    </header>
+    <div class="live-grid" id="liveGrid"></div>
+  </div>
+</section>
+
+<!-- ============ ACCOUNT ============ -->
+<section class="sec sec-light" id="account">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Your account</p>
+      <h2>Build your<br><span>trophy cabinet.</span></h2>
+    </header>
+    <div class="acct">
+      <div>
+        <div class="dk" id="profileCard" data-reveal></div>
+        <div class="dk" id="regsCard" data-reveal></div>
+      </div>
+      <div>
+        <div class="dk" data-reveal>
+          <h3 class="dk-t">Achievements</h3>
+          <div class="cabinet" id="cabinet"></div>
+        </div>
+        <div class="dk" data-reveal>
+          <h3 class="dk-t">Personal records</h3>
+          <div class="records" id="records"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOMENTS ============ -->
+<section class="sec t-sec" id="moments">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Moments</p>
+      <h2>Played<br><span>to the last point.</span></h2>
+    </header>
+    <div class="masonry" id="masonry"></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <div class="foot-top">
+      <h2>Game on.<br><span>Nonstop playtime.</span></h2>
+      <a class="btn-lime" href="https://wa.me/918019765511" target="_blank" rel="noopener">Chat on WhatsApp</a>
+    </div>
+    <div class="foot-cols">
+      <div><h4>Visit</h4><p>Sy. No. 365, 366 &amp; 367,<br>Vattinagulapalli Village,<br>Gandipet, Hyderabad<br>Telangana 500075</p></div>
+      <div><h4>Hours</h4><p>Tennis · 11 AM – 10 PM<br>Everything else · 7 AM – 10 PM<br>Open 365 days</p></div>
+      <div><h4>Contact</h4><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="mailto:hello@example.com">hello@example.com</a></p></div>
+      <div><h4>Follow</h4><p><a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a><br><a href="#">Facebook</a><br><a href="#">YouTube</a></p></div>
+    </div>
+    <div class="foot-word" aria-hidden="true">CROSSCOURT</div>
+    <div class="foot-bot"><span>© 2026 Crosscourt Sports Club. All rights reserved.</span><span>Privacy · Terms</span></div>
+  </div>
+</footer>
+
+</div><!-- /#page -->
+
+<!-- registration dialog -->
+<dialog class="reg" id="regDialog" aria-labelledby="regTitle">
+  <div class="reg-in" id="regForm">
+    <div class="reg-head"><span id="regBadge"></span><div><h3 id="regTitle">Register</h3><p class="sub" id="regSub"></p></div></div>
+    <form id="regF" novalidate>
+      <label>Your name<input name="name" autocomplete="name" required placeholder="e.g. Aarav Reddy"></label>
+      <label>Phone / WhatsApp<input name="phone" inputmode="tel" autocomplete="tel" required placeholder="10-digit mobile number"></label>
+      <label>Partner / team name <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span><input name="team" placeholder="Doubles partner or team"></label>
+      <div class="reg-actions"><button type="button" class="btn-ghost" id="regCancel">Cancel</button><button class="btn-solid" type="submit">Register</button></div>
+    </form>
+  </div>
+  <div class="reg-in reg-ok" id="regDone" hidden>
+    <div class="tick"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h3>You're on the list</h3>
+    <p id="regDoneTxt"></p>
+    <a id="regWa" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a>
+    <button type="button" class="btn-ghost" id="regClose" style="width:100%">Done</button>
+  </div>
+</dialog>
+
+<!-- lightbox -->
+<div class="lb" id="lb" aria-hidden="true">
+  <img id="lbImg" alt="">
+  <button class="lb-x" id="lbX" aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <button class="lb-p" id="lbP" aria-label="Previous"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <button class="lb-n" id="lbN" aria-label="Next"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/tournaments.js"></script>
+</body>
+</html>

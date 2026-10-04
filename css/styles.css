@@ -106,8 +106,8 @@ ul, ol { list-style: none; }
 .menu-info a { border-bottom: 1px solid rgba(7, 18, 13, .3); }
 
 /* ---------------- Hero ---------------- */
-.hero { padding: 10px; }
-.hero-frame { position: relative; height: calc(100svh - var(--bar-h) - 20px); min-height: 600px; max-height: 1100px; border-radius: 24px; overflow: hidden; border: 2px solid var(--cream); background: var(--forest); isolation: isolate; }
+.hero { padding: 0; }
+.hero-frame { position: relative; height: calc(100svh - var(--bar-h)); min-height: 600px; overflow: hidden; background: var(--forest); isolation: isolate; }
 .slides { position: absolute; inset: 0; }
 .slide { position: absolute; inset: 0; overflow: hidden; background: var(--forest); will-change: clip-path; }
 .slide:not(.is-active) { clip-path: inset(0 0 0 100%); }
@@ -124,7 +124,7 @@ ul, ol { list-style: none; }
 .grain { position: absolute; inset: -50%; z-index: 3; pointer-events: none; opacity: .09; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: grain 1.2s steps(6) infinite; }
 @keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); } 60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
 
-.hero-copy { position: absolute; z-index: 5; left: calc(var(--pad) + 8px); bottom: 190px; max-width: min(62%, 980px); }
+.hero-copy { position: absolute; z-index: 5; left: calc(var(--pad) + 10px); bottom: 190px; max-width: min(62%, 980px); }
 .eyebrow { display: flex; align-items: center; gap: 14px; font-size: 13px; letter-spacing: .22em; text-transform: uppercase; font-weight: 550; margin-bottom: 18px; }
 .eyebrow i { width: 44px; height: 1.5px; background: var(--lime); }
 .hero-title { font-size: clamp(42px, 5.8vw, 96px); line-height: .98; letter-spacing: -.035em; font-weight: 600; }
@@ -133,7 +133,7 @@ ul, ol { list-style: none; }
 .hero-sub { margin-top: 22px; max-width: 46ch; font-size: clamp(15px, 1.25vw, 18px); color: rgba(255, 255, 255, .82); }
 
 /* ---------------- Booking card ---------------- */
-.booking { position: absolute; z-index: 20; top: 92px; right: 20px; width: 316px; font-size: 12.5px; color: #1c1d17; }
+.booking { position: absolute; z-index: 20; top: 92px; right: calc(var(--pad) + 10px); width: 316px; font-size: 12.5px; color: #1c1d17; }
 .bk-toggle { display: none; }
 .bk-panel-in { display: grid; grid-template-columns: minmax(0, 1fr); position: relative; }
 .bk-card { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 11px; padding: 14px; border-radius: 16px; background: rgba(251, 250, 242, .97); box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .65); }
@@ -206,7 +206,7 @@ ul, ol { list-style: none; }
 .slots-h .swap, .bk-price .swap { display: inline-block; }
 
 /* ---------------- Hero bottom row ---------------- */
-.hero-foot { position: absolute; z-index: 10; left: 18px; right: 18px; bottom: 18px; display: flex; align-items: flex-end; gap: 28px; pointer-events: none; }
+.hero-foot { position: absolute; z-index: 10; left: calc(var(--pad) + 10px); right: calc(var(--pad) + 10px); bottom: 28px; display: flex; align-items: flex-end; gap: 28px; pointer-events: none; }
 .hero-foot > * { pointer-events: auto; }
 .promo { flex: none; width: 292px; display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: end; padding: 8px; border-radius: 16px; background: var(--lime); color: #17190a; transition: translate .6s var(--ease); }
 .promo:hover { translate: 0 -4px; }
@@ -324,7 +324,7 @@ ul, ol { list-style: none; }
 .foot-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; padding-top: 30px; border-top: 1.5px solid var(--ink); font-size: 15px; }
 .foot-cols h4 { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; opacity: .5; margin-bottom: 14px; font-weight: 550; }
 .foot-cols a { border-bottom: 1px solid rgba(7, 18, 13, .3); }
-.foot-word { font-size: clamp(60px, 17.5vw, 290px); letter-spacing: -.035em; font-weight: 700; line-height: .85; margin: clamp(40px, 6vw, 90px) 0 18px -.04em; white-space: nowrap; color: var(--ink); }
+.foot-word { font-size: clamp(60px, 17.5vw, 290px); letter-spacing: -.035em; font-weight: 700; line-height: .85; margin: clamp(40px, 6vw, 90px) 0 18px -.03em; white-space: nowrap; width: max-content; max-width: none; color: var(--ink); }
 .foot-bot { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 13px; opacity: .6; }
 
 /* ---------------- Story (pinned) ---------------- */
@@ -383,7 +383,7 @@ ul, ol { list-style: none; }
   .menu-links:hover a { opacity: 1; }
   .menu-links a:hover { transform: none; }
 
-  .hero-frame { min-height: 640px; border-radius: 20px; }
+  .hero-frame { min-height: 640px; }
   .hero-copy { left: 20px; right: 20px; top: 104px; bottom: auto; max-width: none; }
   .hero-title { font-size: clamp(38px, 11.5vw, 64px); }
   .hero-sub { display: none; }
@@ -431,3 +431,10 @@ ul, ol { list-style: none; }
   .grain, .marquee-track { animation: none; }
   * { transition-duration: .01ms !important; }
 }
+
+/* ---------- back-to-top button ---------- */
+.to-top { position: fixed; z-index: 80; right: calc(var(--pad) + 4px); bottom: 24px; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--lime); border: 1.5px solid var(--lime); box-shadow: 0 10px 28px -8px rgba(0, 0, 0, .55); opacity: 0; transform: translateY(14px) scale(.9); visibility: hidden; pointer-events: none; transition: opacity .4s var(--ease), transform .5s var(--ease), visibility 0s .5s, background .3s, color .3s; }
+.to-top.is-on { opacity: 1; transform: none; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+.to-top:hover { background: var(--lime); color: var(--ink); transform: translateY(-3px); }
+.to-top:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+@media (max-width: 640px) { .to-top { width: 42px; height: 42px; right: 14px; bottom: 16px; } }
