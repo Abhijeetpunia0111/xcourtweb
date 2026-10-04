@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>document.documentElement.classList.add("js")</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Crosscourt Sports Club — Hyderabad</title>
+  <meta name="description" content="Game on. Nonstop playtime. Book tennis, pickleball, box cricket, football and swimming at Crosscourt Sports Club, Gandipet, Hyderabad.">
+  <meta name="theme-color" content="#07120d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@300..800&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ribbon.css">
+</head>
+<body>
+
+<!-- ============ Announcement bar (closeable) ============ -->
+<div class="bar" id="bar">
+  <p>Open 365 days · 7 AM – 10 PM — <strong>Pay &amp; Play</strong> slots from ₹250/hr. <a href="#pay-play">See rates</a></p>
+  <button class="bar-x" id="barClose" aria-label="Dismiss announcement">
+    <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<!-- ============ Header ============ -->
+<header class="nav" id="nav">
+  <div class="nav-l">
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">
+      <span class="burger" aria-hidden="true"><i></i><i></i></span>
+      <span class="menu-label" aria-hidden="true"><span>Menu</span><span>Close</span></span>
+      <span class="sr">Open menu</span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <a class="nav-link" href="#book" data-book>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span>Book a court</span>
+    </a>
+  </div>
+
+  <a class="logo" href="#top" aria-label="Crosscourt Sports Club — home">
+    <span class="logo-word">CROSSCOURT</span>
+    <span class="logo-sub">Sports · Hyderabad</span>
+  </a>
+
+  <div class="nav-r">
+    <a class="icon-btn" href="https://maps.google.com/?q=Crosscourt+Sports+Club+Gandipet+Hyderabad" target="_blank" rel="noopener" aria-label="Directions">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>
+    </a>
+    <a class="icon-btn" href="tel:+918019765511" aria-label="Call +91 80197 65511">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+    </a>
+    <a class="pill" href="#book" data-book>Book court</a>
+  </div>
+</header>
+
+<!-- ============ Full-screen menu ============ -->
+<nav class="menu" id="menu" aria-label="Main menu" aria-hidden="true">
+  <div class="menu-in">
+    <ul class="menu-links" id="menuLinks">
+      <li><a href="#book" data-book data-scene="tennis" data-copy="Pick a sport, a slot and you're on court — in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
+      <li><a href="#pay-play" data-scene="pickleball" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
+      <li><a href="#membership" data-scene="swimming" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
+      <li><a href="#facilities" data-scene="football" data-copy="Courts, turf, pool, gym and more — all under one roof."><span class="mi">04</span><span class="ml"><span>Facilities</span></span></a></li>
+      <li><a href="#coaching" data-scene="tennis" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">05</span><span class="ml"><span>Coaching</span></span></a></li>
+      <li><a href="#why" data-scene="cricket" data-copy="Why Hyderabad plays at Crosscourt."><span class="mi">06</span><span class="ml"><span>Why Crosscourt</span></span></a></li>
+      <li><a href="#contact" data-scene="pickleball" data-copy="Find us in Gandipet — or message us on WhatsApp."><span class="mi">07</span><span class="ml"><span>Contact</span></span></a></li>
+    </ul>
+
+    <aside class="menu-side">
+      <div class="menu-feature" id="menuFeature">
+        <div class="menu-art" id="menuArt"></div>
+        <p class="menu-copy" id="menuCopy">Game on. Nonstop playtime.</p>
+      </div>
+      <div class="menu-info">
+        <div><span class="k">Visit</span><p>Sy. No. 365, 366 &amp; 367, Vattinagulapalli Village, Gandipet, Hyderabad 500075</p></div>
+        <div><span class="k">Hours</span><p>Tennis 11 AM – 10 PM<br>All other sports 7 AM – 10 PM</p></div>
+        <div><span class="k">Talk to us</span><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="https://wa.me/918019765511" target="_blank" rel="noopener">WhatsApp</a> · <a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a></p></div>
+      </div>
+    </aside>
+  </div>
+</nav>
+
+<div id="page">
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top" aria-roledescription="carousel" aria-label="Sports at Crosscourt">
+  <div class="hero-frame" id="heroFrame">
+
+    <div class="slides" id="slides"></div>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="hero-copy">
+      <p class="eyebrow"><i></i><span id="heroEyebrow">Tennis</span></p>
+      <h1 class="hero-title" id="heroTitle" aria-live="polite"><span class="line"><span class="t"></span></span></h1>
+      <p class="hero-sub" id="heroSub"></p>
+    </div>
+
+    <!-- ===== Booking card ===== -->
+    <aside class="booking is-collapsed" id="book" aria-label="Book a court">
+      <button class="bk-toggle" id="bkToggle" aria-expanded="false" aria-controls="bkPanel">
+        <span class="bk-toggle-l"><b id="tgSport">Tennis</b><small>Tap to book</small></span>
+        <span class="bk-toggle-r"><b id="tgPrice">₹800</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></span>
+      </button>
+
+      <div class="bk-panel" id="bkPanel">
+        <div class="bk-panel-in">
+
+          <div class="bk-card">
+            <div class="bk-top">
+              <h2 class="bk-title">Book a court</h2>
+              <span class="bk-loc">Gandipet</span>
+            </div>
+
+            <div class="bk-grid">
+              <div class="dd " data-dd="sport">
+                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-k">Sport</span>
+                  <span class="dd-v swap" id="vSport">Tennis</span>
+                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="dd-menu " role="listbox"></div>
+              </div>
+              <div class="dd " data-dd="court">
+                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-k">Court</span>
+                  <span class="dd-v swap" id="vCourt">Center Court</span>
+                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="dd-menu " role="listbox"></div>
+              </div>
+              <div class="dd dd-date" data-dd="date">
+                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-k">Date</span>
+                  <span class="dd-v" id="vDate">Today</span>
+                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="dd-menu dd-menu-grid" role="listbox"></div>
+              </div>
+              <div class="dd dd-dur" data-dd="dur">
+                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="dd-k">Duration</span>
+                  <span class="dd-v" id="vDur">60 mins</span>
+                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="dd-menu " role="listbox"></div>
+              </div>
+            </div>
+
+            <div class="slots-wrap">
+              <div class="slots-h"><span>Start time</span><span class="swap" id="bkNext"></span></div>
+              <div class="slots swap" id="slots" role="radiogroup" aria-label="Start time"></div>
+            </div>
+
+            <div class="bk-foot">
+              <div class="bk-price">
+                <strong id="price">&#8377;0</strong>
+                <span class="swap" id="priceNote">Off-peak · 1 hr</span>
+              </div>
+              <button class="bk-cta" id="bkCta" type="button">
+                <span class="bk-cta-t">Confirm &amp; Pay</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- confirmation state -->
+          <div class="bk-done" id="bkDone" aria-hidden="true">
+            <div class="done-tick"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+            <h3>Slot held for you</h3>
+            <dl class="done-list" id="doneList"></dl>
+            <a class="done-wa" id="doneWa" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a>
+            <button class="done-back" id="doneBack" type="button">Change booking</button>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== Bottom row ===== -->
+    <div class="hero-foot">
+      <a class="promo" href="#coaching" id="promo">
+        <span class="promo-art" id="promoArt"></span>
+        <span class="promo-t"><b class="swap" id="promoTitle">First time on the court?</b><small class="swap" id="promoSub"></small></span>
+      </a>
+      <div class="ctrl">
+        <button class="ctrl-b" id="prevBtn" aria-label="Previous sport"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="ctrl-b" id="playBtn" aria-label="Pause autoplay"><svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="i-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg></button>
+        <button class="ctrl-b" id="nextBtn" aria-label="Next sport"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Tennis</span><i></i><span>Pickleball</span><i></i><span>Box Cricket</span><i></i><span>Football</span><i></i><span>Swimming</span><i></i><span>Gym</span><i></i><span>Table Tennis</span><i></i><span>Foosball</span><i></i>
+    <span>Tennis</span><i></i><span>Pickleball</span><i></i><span>Box Cricket</span><i></i><span>Football</span><i></i><span>Swimming</span><i></i><span>Gym</span><i></i><span>Table Tennis</span><i></i><span>Foosball</span><i></i>
+  </div>
+</div>
+
+<!-- ============ STORY (pinned, scroll-driven) ============ -->
+<section class="story" id="story" aria-labelledby="storyTitle">
+  <h2 class="sr" id="storyTitle">What if it all works out?</h2>
+  <div class="story-stage">
+    <div class="story-layer story-ghost" aria-hidden="true"></div>
+    <div class="story-layer story-ghost" aria-hidden="true"></div>
+    <div class="story-layer story-ghost" aria-hidden="true"></div>
+    <div class="story-layer story-front">
+      <picture>
+        <source media="(max-aspect-ratio: 1/1)" srcset="assets/img/court-aerial-portrait.jpg">
+        <img class="story-img" src="assets/img/court-aerial.jpg" alt="Aerial view of a clay tennis court framed by trees" decoding="async">
+      </picture>
+      <div class="story-shade" aria-hidden="true"></div>
+      <div class="story-text" aria-hidden="true">
+        <p class="st st-script">What</p>
+        <p class="st st-bold">if it</p>
+        <p class="st st-bold">all</p>
+        <p class="st st-script">works out?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RIBBON (pinned, scroll-driven) ============ -->
+<section class="rib" id="ribbon" aria-labelledby="ribTitle">
+  <div class="rib-stage" id="ribStage">
+    <div class="rib-bg" aria-hidden="true"></div>
+    <h2 class="rib-title" id="ribTitle"><span class="rib-l"><span>Move with</span></span><span class="rib-l"><span>the game.</span></span></h2>
+
+    <!-- ribbon passes behind the athlete on this canvas… -->
+    <canvas class="rib-cv rib-back" id="ribBack" aria-hidden="true"></canvas>
+    <!-- athlete cut-out, placed in the same 1600×900 design space as the ribbon (see js/ribbon.js) -->
+    <svg class="rib-ath" id="ribAth" viewBox="0 0 1600 900" preserveAspectRatio="none" role="img" aria-label="Pickleball player stretching for the ball">
+      <image href="assets/img/athlete.webp" x="331.6" y="29.5" width="884.9" height="868.9"/>
+    </svg>
+    <!-- …and in front of the athlete on this one -->
+    <canvas class="rib-cv rib-front" id="ribFront" aria-hidden="true"></canvas>
+
+    <div class="rib-flood" id="ribFlood" aria-hidden="true"></div>
+    <!-- copy that fades in on the lime once the ribbon has filled the window -->
+    <div class="rib-copy" id="ribCopy">
+      <div class="wrap">
+        <p class="rn-k">Crosscourt Sports Club</p>
+        <h2 class="rn-h" id="ribNextTitle"><span class="rn-line">Find your rhythm,</span><span class="rn-line">one rally at a time.</span></h2>
+        <p class="rn-lead">Tennis, pickleball, box cricket, football and more — book a slot in seconds and let the game carry you.</p>
+        <a class="rn-cta" href="#book" data-book>Book a court</a>
+      </div>
+    </div>
+    <div class="rib-hint" id="ribHint" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </div>
+</section>
+
+<!-- ============ FACILITIES (dummy copy) ============ -->
+<section class="sec" id="facilities">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Facilities</p>
+      <h2>Game-ready,<br><span>all&nbsp;day.</span></h2>
+      <p class="lead">Eight sports and one address. Pick a court, pull on your shoes — everything else is handled.</p>
+    </header>
+
+    <div class="bento">
+      <article class="fac f-tennis" data-reveal data-img="assets/img/tennis.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">04+1</span><h3>Tennis</h3><p>Four ITF-standard courts and a dedicated center court.</p></div>
+      </article>
+      <div class="fac-stack s-a">
+        <article class="fac f-cricket" data-reveal data-scene="cricket">
+          <div class="fac-art"></div>
+          <div class="fac-txt"><span class="fac-n">Box</span><h3>Cricket</h3><p>Netted box-cricket arena built for quick games.</p></div>
+        </article>
+        <article class="fac f-swim" data-reveal data-scene="swimming">
+          <div class="fac-art"></div>
+          <div class="fac-txt"><span class="fac-n">Pool</span><h3>Swimming</h3><p>A temperature-controlled pool, open from early morning.</p></div>
+        </article>
+      </div>
+      <article class="fac f-pickle" data-reveal data-img="assets/img/pickleball.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">12</span><h3>Pickleball</h3><p>Twelve semi-indoor courts — rain or shine, day or night.</p></div>
+      </article>
+      <article class="fac f-turf" data-reveal data-img="assets/img/football.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">Turf</span><h3>Football</h3><p>Fast, floodlit box-football turf.</p></div>
+      </article>
+      <div class="fac-stack s-b">
+        <article class="fac f-track" data-reveal data-img="assets/img/track.jpg">
+          <div class="fac-art"></div>
+          <div class="fac-txt"><span class="fac-n">Run</span><h3>Running track &amp; lawns</h3><p>Open space for warm-ups and events.</p></div>
+        </article>
+        <article class="fac f-plain f-gym" data-reveal>
+          <div class="fac-txt"><span class="fac-n">Gym</span><h3>Gym, table tennis &amp; foosball</h3><p>A high-performance gym plus competition-ready tables.</p></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY US (dummy copy) ============ -->
+<section class="sec sec-light" id="why">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Why Crosscourt</p>
+      <h2>Built for people<br><span>who actually play.</span></h2>
+    </header>
+
+    <div class="stats">
+      <div class="stat" data-reveal><b data-count="365">0</b><span>days open a year</span></div>
+      <div class="stat" data-reveal><b data-count="12">0</b><span>pickleball courts</span></div>
+      <div class="stat" data-reveal><b data-count="4">0</b><span>tennis courts</span></div>
+      <div class="stat" data-reveal><b data-count="8">0</b><span>sports under one roof</span></div>
+    </div>
+
+    <ol class="why">
+      <li data-reveal><span>01</span><h3>Pro-standard surfaces</h3><p>ITF-standard tennis courts and competition-ready tables — the same kit you'd see at a tournament.</p></li>
+      <li data-reveal><span>02</span><h3>Book in seconds</h3><p>Choose a sport, a slot and a duration. Fast form, instant price, no phone tag.</p></li>
+      <li data-reveal><span>03</span><h3>Fair, flexible pricing</h3><p>Simple hourly peak and off-peak rates. Play when it suits you; pay for what you use.</p></li>
+      <li data-reveal><span>04</span><h3>Everything on site</h3><p>Lockers, change rooms, a gym, a pool and a coaching academy — one visit covers it all.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ PAY & PLAY ============ -->
+<section class="sec" id="pay-play">
+  <div class="wrap two">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Pay &amp; Play</p>
+      <h2>Hourly rates,<br><span>no strings.</span></h2>
+      <p class="lead">Peak slots run in the evenings and on weekends. Everything else is off-peak.</p>
+      <a class="btn-lime" href="#book" data-book>Book a court</a>
+    </header>
+    <div class="rates" data-reveal>
+      <div class="rate-h"><span>Sport</span><span>Peak</span><span>Off-peak</span></div>
+      <div class="rate"><span>Tennis</span><span>₹1,100</span><span>₹800</span></div>
+      <div class="rate"><span>Pickleball</span><span>₹750</span><span>₹500</span></div>
+      <div class="rate"><span>Box Cricket</span><span>₹1,250</span><span>₹1,000</span></div>
+      <div class="rate"><span>Football</span><span>₹1,250</span><span>₹1,000</span></div>
+      <div class="rate"><span>Swimming</span><span>₹500</span><span>₹250</span></div>
+      <div class="rate"><span>Gym</span><span>₹500</span><span>₹250</span></div>
+      <div class="rate"><span>Table Tennis</span><span>₹500</span><span>₹250</span></div>
+      <div class="rate"><span>Foosball</span><span>₹300</span><span>₹200</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEMBERSHIP (dummy copy) ============ -->
+<section class="sec sec-light" id="membership">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Membership</p>
+      <h2>Your everyday<br><span>sports club.</span></h2>
+    </header>
+    <div class="members">
+      <article class="mem" data-reveal><span class="mem-n">A</span><h3>Community</h3><p>Access the whole club — pool, gym, courts and the events calendar.</p><a href="#contact">Enquire →</a></article>
+      <article class="mem" data-reveal><span class="mem-n">B</span><h3>Tennis</h3><p>Priority court slots and member rates on coaching.</p><a href="#contact">Enquire →</a></article>
+      <article class="mem" data-reveal><span class="mem-n">C</span><h3>Pickleball</h3><p>Recurring evening slots and community ladders.</p><a href="#contact">Enquire →</a></article>
+      <article class="mem" data-reveal><span class="mem-n">D</span><h3>Gym</h3><p>Unlimited floor access with a high-performance setup.</p><a href="#contact">Enquire →</a></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COACHING ============ -->
+<section class="coach" id="coaching">
+  <div class="wrap">
+    <div class="coach-in" data-reveal>
+      <img class="coach-img" src="assets/img/gameready.jpg" alt="" loading="lazy" decoding="async">
+      <p class="kicker">XCS Tennis Academy</p>
+      <h2>Train smart.<br>Play hard.</h2>
+      <a class="btn-lime" href="#contact">Join academy</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER (dummy) ============ -->
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <div class="foot-top">
+      <h2>Game on.<br><span>Nonstop playtime.</span></h2>
+      <a class="btn-lime" href="https://wa.me/918019765511" target="_blank" rel="noopener">Chat on WhatsApp</a>
+    </div>
+    <div class="foot-cols">
+      <div><h4>Visit</h4><p>Sy. No. 365, 366 &amp; 367,<br>Vattinagulapalli Village,<br>Gandipet, Hyderabad<br>Telangana 500075</p></div>
+      <div><h4>Hours</h4><p>Tennis · 11 AM – 10 PM<br>Everything else · 7 AM – 10 PM<br>Open 365 days</p></div>
+      <div><h4>Contact</h4><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="mailto:hello@example.com">hello@example.com</a></p></div>
+      <div><h4>Follow</h4><p><a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a><br><a href="#">Facebook</a><br><a href="#">YouTube</a></p></div>
+    </div>
+    <div class="foot-word" aria-hidden="true">CROSSCOURT</div>
+    <div class="foot-bot"><span>© 2026 Crosscourt Sports Club. All rights reserved.</span><span>Privacy · Terms</span></div>
+  </div>
+</footer>
+
+</div><!-- /#page -->
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/main.js"></script>
+<script src="js/ribbon.js"></script>
+</body>
+</html>
