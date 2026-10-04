@@ -46,15 +46,9 @@
   const menu = $('#menu'), menuBtn = $('#menuBtn'), page = $('#page');
   let menuOpen = false;
 
-  const SCENE_IDS = { tennis: 'tn', pickleball: 'pb', cricket: 'cr', football: 'fb', swimming: 'sw' };
   const menuArt = $('#menuArt');
-  if (window.SCENES) {
-    menuArt.innerHTML = Object.keys(SCENE_IDS).map((id) => {
-      let svg = window.SCENES[id]().replace(/(tn|pb|cr|fb|sw)-(sky|glow|beam|fade|blur|soft)/g, '$1m-$2')
-        .replace(/<g><circle[^>]*>\s*<animateMotion[^>]*\/><\/circle><\/g>/g, '').replace(/<animate[^>]*\/>/g, '');
-      return `<svg data-s="${id}" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">${svg}</svg>`;
-    }).join('');
-  }
+  // each menu link carries its own venue photo (data-img); hovering a link fades its photo in
+  menuArt.innerHTML = $$('#menuLinks a').map((a) => `<img data-s="${a.dataset.scene}" src="${a.dataset.img}" alt="" decoding="async">`).join('');
   const menuSvgs = $$('#menuArt > *');
   function swapText(el, text) {
     if (!el || el.textContent === text) return;
@@ -62,7 +56,7 @@
     gsap.to(el, { opacity: 0, y: -10, duration: 0.3, ease: 'power2.in', overwrite: true, onComplete: () => { el.textContent = text; gsap.fromTo(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }); } });
   }
   const showScene = (id, copy) => { menuSvgs.forEach((s) => s.classList.toggle('on', s.dataset.s === id)); swapText($('#menuCopy'), copy); };
-  showScene('tennis', 'Game on. Nonstop playtime.');
+  showScene('book', 'Game on. Nonstop playtime.');
   $$('#menuLinks a').forEach((a) => {
     const on = () => showScene(a.dataset.scene, a.dataset.copy);
     a.addEventListener('mouseenter', on); a.addEventListener('focus', on);

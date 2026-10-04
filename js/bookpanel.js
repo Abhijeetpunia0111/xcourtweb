@@ -20,6 +20,9 @@
     { id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22], courts: [['Box Cricket Arena', 'Netted']] },
     { id: 'football', name: 'Football', rate: [1250, 1000], open: [7, 22], courts: [['Box Football Arena', 'Turf']] },
     { id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22], courts: [['Main Pool', 'Lap lanes']] },
+    { id: 'gym', name: 'Gym', rate: [500, 250], open: [7, 22], courts: [['Gym Floor', 'High-performance']] },
+    { id: 'tabletennis', name: 'Table Tennis', rate: [500, 250], open: [7, 22], courts: [['Table 01', 'Competition-ready'], ['Table 02', 'Competition-ready']] },
+    { id: 'foosball', name: 'Foosball', rate: [300, 200], open: [7, 22], courts: [['Foosball Table', 'Aerofit']] },
   ];
   const DURS = [1, 1.5, 2];
 
@@ -78,15 +81,15 @@
         </header>
         <div class="bp-cols">
           <section class="bp-l" aria-label="Sport and court">
-            <h3 class="bp-k"><b>01</b> Sport</h3>
+            <h3 class="sr">Sport</h3>
             <ul class="bp-sports" id="bpSports"></ul>
-            <h3 class="bp-k"><b>02</b> Court</h3>
+            <h3 class="bp-k">Court</h3>
             <div class="bp-courts" id="bpCourts"></div>
           </section>
           <section class="bp-r" aria-label="Date and time">
-            <h3 class="bp-k"><b>03</b> Date</h3>
+            <h3 class="bp-k">Date</h3>
             <div class="bp-dates" id="bpDates"></div>
-            <div class="bp-k bp-k-row"><h3><b>04</b> Start time</h3><div class="bp-dur" id="bpDur" role="group" aria-label="Duration"></div></div>
+            <div class="bp-k bp-k-row"><h3>Start time</h3><div class="bp-dur" id="bpDur" role="group" aria-label="Duration"></div></div>
             <div class="bp-slots" id="bpSlots" role="radiogroup" aria-label="Start time"></div>
           </section>
         </div>
@@ -122,7 +125,7 @@
 
   function render() {
     ensureStart();
-    $('#bpSports').innerHTML = SPORTS.map((s, i) => `<li><button type="button" class="bp-sport${i === st.sport ? ' is-on' : ''}" data-sport="${i}" style="--i:${i}"><em>0${i + 1}</em><span>${s.name}</span><small>from ${inr(s.rate[1])}/hr</small></button></li>`).join('');
+    $('#bpSports').innerHTML = SPORTS.map((s, i) => `<li><button type="button" class="bp-sport${i === st.sport ? ' is-on' : ''}" data-sport="${i}" style="--i:${i}"><span>${s.name}</span><small>from ${inr(s.rate[1])}/hr</small></button></li>`).join('');
     $('#bpCourts').innerHTML = sp().courts.map((c, i) => `<button type="button" class="bp-chip${i === st.court ? ' is-on' : ''}" data-court="${i}">${c[0]}${c[1] ? `<small>${c[1]}</small>` : ''}</button>`).join('');
     $('#bpDates').innerHTML = days.map((d, i) => {
       const wk = d.getDay() === 0 || d.getDay() === 6;

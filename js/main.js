@@ -35,6 +35,7 @@
     },
     {
       id: 'pickleball', name: 'Pickleball', rate: [750, 500], open: [7, 22],
+      img: 'assets/img/moments/pickleball-courts.webp', pos: '50% 55%',
       title: 'Dink. Drive. Repeat.',
       sub: 'Twelve semi-indoor courts, built for fast, social rallies.',
       courts: Array.from({ length: 12 }, (_, i) => ['Court ' + String(i + 1).padStart(2, '0'), 'Semi-indoor']),
@@ -42,6 +43,7 @@
     },
     {
       id: 'football', name: 'Football', rate: [1250, 1000], open: [7, 22],
+      img: 'assets/img/moments/football-cage.webp', pos: '50% 70%',
       title: 'Fast feet. Floodlit nights.',
       sub: 'Box-football turf with the pace of a proper match.',
       courts: [['Box Football Arena', 'Turf']],
@@ -49,6 +51,7 @@
     },
     {
       id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22],
+      img: 'assets/img/moments/aerial-courts.webp', pos: '50% 45%',
       title: 'Own the baseline.',
       sub: 'Four ITF-standard courts and a dedicated center court.',
       courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']],
@@ -56,13 +59,32 @@
     },
     {
       id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22],
+      img: 'assets/img/moments/box-cricket.webp', pos: '50% 60%',
       title: 'Box cricket, after dark.',
       sub: 'A netted arena for quick, high-energy games with your crew.',
       courts: [['Box Cricket Arena', 'Netted']],
       tags: ['Netted arena', 'Turf surface'],
     },
+    // Booking-only sports (no hero slide): they appear in the booking card / panel, not in the carousel.
+    // Courts, hours and table counts are placeholders - confirm with the club.
+    {
+      id: 'gym', name: 'Gym', rate: [500, 250], open: [7, 22], extra: true,
+      courts: [['Gym Floor', 'High-performance']],
+      tags: ['Fully equipped', 'Open 7 AM – 10 PM'],
+    },
+    {
+      id: 'tabletennis', name: 'Table Tennis', rate: [500, 250], open: [7, 22], extra: true,
+      courts: [['Table 01', 'Competition-ready'], ['Table 02', 'Competition-ready']],
+      tags: ['Competition-ready tables', 'Max 4 players'],
+    },
+    {
+      id: 'foosball', name: 'Foosball', rate: [300, 200], open: [7, 22], extra: true,
+      courts: [['Foosball Table', 'Aerofit']],
+      tags: ['Social games', 'Max 4 players'],
+    },
   ];
-  const N = SPORTS.length;
+  const SLIDE_SPORTS = SPORTS.filter((s) => !s.extra);   // the carousel only shows sports that have hero media
+  const N = SLIDE_SPORTS.length;
 
   /* ----------------------------------------------------------
      Helpers
@@ -92,7 +114,30 @@
   ---------------------------------------------------------- */
   let lenis = null;
   if (!reduceMotion && window.Lenis) {
-    lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.95 });
+    /* Speed governor for the exit of the pinned ribbon section: a hard flick used to carry the page straight past the
+       facilities cards. We limit how far the scroll target may run ahead of the page (the "lead"); that lead cap
+       shrinks to SLOW_CAP just as the ribbon un-pins and relaxes back to FAST_CAP over SLOW_OUT viewports. */
+    const govEl = document.getElementById('facilities');
+    const FAST_CAP = 1.6, SLOW_CAP = 0.22, SLOW_IN = 0.5, SLOW_OUT = 1.7;      // in viewport heights
+    const smooth = (t) => t * t * (3 - 2 * t);
+    const slowness = () => {                                                // 0 = normal speed … 1 = slowest
+      if (!govEl) return 0;
+      const vh = window.innerHeight, d = (vh - govEl.getBoundingClientRect().top) / vh;   // viewports of facilities already on screen
+      if (d <= -SLOW_IN || d >= SLOW_OUT) return 0;
+      return smooth(d < 0 ? 1 + d / SLOW_IN : 1 - d / SLOW_OUT);
+    };
+    lenis = new Lenis({
+      lerp: 0.085, wheelMultiplier: 0.95,
+      virtualScroll: (e) => {
+        if (!e.event.type.includes('wheel') || !e.deltaY) return true;
+        const vh = window.innerHeight, cap = vh * (FAST_CAP + (SLOW_CAP - FAST_CAP) * slowness());
+        const lead = lenis.targetScroll - lenis.animatedScroll;
+        if (Math.sign(lead) === Math.sign(e.deltaY) && Math.abs(lead) + Math.abs(e.deltaY) > cap) {
+          e.deltaY = Math.sign(e.deltaY) * Math.max(0.01, cap - Math.abs(lead));   // never 0, or Lenis would let the native scroll through
+        }
+        return true;
+      },
+    });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -125,7 +170,7 @@
      Build hero slides
   ---------------------------------------------------------- */
   const slidesEl = $('#slides');
-  slidesEl.innerHTML = SPORTS.map((sp, i) => `
+  slidesEl.innerHTML = SLIDE_SPORTS.map((sp, i) => `
     <article class="slide${i === 0 ? ' is-active' : ''}" data-i="${i}" role="group" aria-roledescription="slide" aria-label="${sp.name}">
       <div class="slide-art">${art(sp)}</div>
       <video playsinline loop preload="none" data-src="assets/video/${sp.id}.mp4"></video>
@@ -242,7 +287,7 @@
       const o = e.target.closest('.dd-opt'); if (!o) return;
       const v = o.dataset.val, name = d.dataset.dd;
       d.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
-      if (name === 'sport') { goTo(+v, +v > st.sport ? 1 : -1); }
+      if (name === 'sport') { if (+v < N) goTo(+v, +v > st.sport ? 1 : -1); else { st.sport = +v; st.court = 0; renderAll({ swap: true }); } }
       else {
         if (name === 'court') st.court = +v;
         if (name === 'date') st.date = dateList()[+v];
@@ -312,7 +357,7 @@
      Sound is ON by default. Browsers refuse unmuted autoplay until the visitor has interacted with the page, so if the
      first attempt is refused the video plays muted and the sound switches on at the first click / tap / key press. */
   let soundOn = true;
-  const muteBtn = $('#muteBtn'), sndHint = $('#sndHint');
+  const muteBtn = $('#muteBtn');
   const curVideo = () => $('video', slideEls[cur]);
   const isReady = (v) => v && v.classList.contains('is-ready');
 
@@ -323,7 +368,6 @@
     const audible = show && !v.muted && !v.paused;
     muteBtn.classList.toggle('is-muted', !audible);
     muteBtn.setAttribute('aria-pressed', String(audible));
-    sndHint.classList.toggle('is-on', show && soundOn && v.muted && !v.paused);   // browser is holding the sound back: ask for one click
     const txt = audible ? 'Mute sound' : (soundOn ? 'Tap for sound' : 'Unmute sound');
     muteBtn.setAttribute('aria-label', txt); muteBtn.setAttribute('title', txt);
   }
@@ -502,13 +546,14 @@
   let menuOpen = false;
 
   const menuArt = $('#menuArt');
-  menuArt.innerHTML = SPORTS.map((sp) => art(sp, 'm' + sp.id.slice(0, 2), true, `data-s="${sp.id}"`)).join('');
+  // each menu link carries its own venue photo (data-img); hovering a link fades its photo in
+  menuArt.innerHTML = $$('#menuLinks a').map((a) => `<img data-s="${a.dataset.scene}" src="${a.dataset.img}" alt="" decoding="async">`).join('');
   const menuSvgs = $$('#menuArt > *');
   const showScene = (id, copy) => {
     menuSvgs.forEach((s) => s.classList.toggle('on', s.dataset.s === id));
     swapText($('#menuCopy'), copy, { y: 10 });
   };
-  showScene('tennis', 'Game on. Nonstop playtime.');
+  showScene('book', 'Game on. Nonstop playtime.');
   $$('#menuLinks a').forEach((a) => {
     const on = () => showScene(a.dataset.scene, a.dataset.copy);
     a.addEventListener('mouseenter', on); a.addEventListener('focus', on);
@@ -567,7 +612,8 @@
     if (id === '#book') {
       const want = a.dataset.bookSport || (a.classList.contains('hero-cta') ? SPORTS[cur].id : '');
       const idx = SPORTS.findIndex((sp) => sp.id === want);
-      if (idx >= 0) { if (idx !== cur) goTo(idx, idx > cur ? 1 : -1); setAutoplayPaused(true); }
+      if (idx >= 0 && idx < N) { if (idx !== cur) goTo(idx, idx > cur ? 1 : -1); setAutoplayPaused(true); }
+      else if (idx >= N) { st.sport = idx; st.court = 0; renderAll({ swap: true }); setAutoplayPaused(true); }
     }
     const go = () => {
       if (id === '#book' || id === '#top') { scrollToY(0); if (id === '#book') pulseBooking(); }

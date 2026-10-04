@@ -22,7 +22,7 @@
 
 <!-- ============ Announcement bar (closeable) ============ -->
 <div class="bar" id="bar">
-  <p>Open 365 days · 7 AM – 10 PM · <strong>Pay &amp; Play</strong> slots from ₹250/hr. <a href="#pay-play">See rates</a></p>
+  <div class="bar-track"><p>Open 365 days · 7 AM – 10 PM · <strong>Pay &amp; Play</strong> slots from ₹250/hr. <a href="#pay-play">See rates</a></p><p class="bar-dup" aria-hidden="true">Open 365 days · 7 AM – 10 PM · <strong>Pay &amp; Play</strong> slots from ₹250/hr. <a tabindex="-1" href="#pay-play">See rates</a></p></div>
   <button class="bar-x" id="barClose" aria-label="Dismiss announcement">
     <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
@@ -63,14 +63,12 @@
 <nav class="menu" id="menu" aria-label="Main menu" aria-hidden="true">
   <div class="menu-in">
     <ul class="menu-links" id="menuLinks">
-      <li><a href="#book" data-book data-scene="tennis" data-copy="Pick a sport, a slot and you're on court in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
-      <li><a href="#pay-play" data-scene="pickleball" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
-      <li><a href="#membership" data-scene="swimming" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
-      <li><a href="#facilities" data-scene="football" data-copy="Courts, turf, pool, gym and more, all under one roof."><span class="mi">04</span><span class="ml"><span>Facilities</span></span></a></li>
-      <li><a href="#coaching" data-scene="tennis" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">05</span><span class="ml"><span>Coaching</span></span></a></li>
-      <li><a href="#why" data-scene="cricket" data-copy="Why Hyderabad plays at Crosscourt."><span class="mi">06</span><span class="ml"><span>Why Crosscourt</span></span></a></li>
-      <li><a href="tournaments.html" data-scene="football" data-copy="Open championships across every sport. Do you have what it takes?"><span class="mi">07</span><span class="ml"><span>Tournaments</span></span></a></li>
-      <li><a href="#contact" data-scene="pickleball" data-copy="Find us in Gandipet, or message us on WhatsApp."><span class="mi">08</span><span class="ml"><span>Contact</span></span></a></li>
+      <li><a data-scene="book" data-img="assets/img/menu/book.webp" href="#book" data-book data-copy="Pick a sport, a slot and you're on court in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
+      <li><a data-scene="play" data-img="assets/img/menu/play.webp" href="#pay-play" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
+      <li><a data-scene="member" data-img="assets/img/menu/member.webp" href="#membership" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
+      <li><a data-scene="coach" data-img="assets/img/menu/coach.webp" href="#coaching" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">04</span><span class="ml"><span>Coaching</span></span></a></li>
+      <li><a data-scene="gallery" data-img="assets/img/menu/gallery.webp" href="gallery.html" data-copy="Moments from tournaments, carnivals and everyday play on court."><span class="mi">05</span><span class="ml"><span>Gallery</span></span></a></li>
+      <li><a data-scene="tournaments" data-img="assets/img/menu/tournaments.webp" href="tournaments.html" data-copy="Open championships across every sport. Do you have what it takes?"><span class="mi">06</span><span class="ml"><span>Tournaments</span></span></a></li>
     </ul>
 
     <aside class="menu-side">
@@ -191,7 +189,6 @@
     <!-- ===== Bottom row ===== -->
     <div class="hero-foot">
       <div class="ctrl">
-        <span class="snd-hint" id="sndHint" aria-hidden="true">Click anywhere for sound</span>
         <button class="ctrl-b is-hidden" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute sound">
           <svg class="i-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
           <svg class="i-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
@@ -305,10 +302,19 @@
           <div class="fac-art"></div>
           <div class="fac-txt"><span class="fac-n">Run</span><h3>Running track &amp; lawns</h3><p>Open space for warm-ups and events.</p></div>
         </article>
-        <article class="fac f-plain f-gym" data-reveal>
-          <div class="fac-txt"><span class="fac-n">Gym</span><h3>Gym, table tennis &amp; foosball</h3><p>A high-performance gym plus competition-ready tables.</p></div>
-        </article>
       </div>
+      <article class="fac f-third" data-reveal data-img="assets/img/gym.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">Gym</span><h3>Gym</h3><p>Unmatched fitness in a fully equipped, high-performance gym.</p><a class="fac-book" href="#book" data-book data-book-sport="gym">Book gym <span aria-hidden="true">&rarr;</span></a></div>
+      </article>
+      <article class="fac f-third" data-reveal data-img="assets/img/table-tennis.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">Tables</span><h3>Table Tennis</h3><p>Competition-ready tables that sharpen your spin, speed and reflexes.</p><a class="fac-book" href="#book" data-book data-book-sport="tabletennis">Book table tennis <span aria-hidden="true">&rarr;</span></a></div>
+      </article>
+      <article class="fac f-third" data-reveal data-img="assets/img/foosball.jpg">
+        <div class="fac-art"></div>
+        <div class="fac-txt"><span class="fac-n">Social</span><h3>Foosball</h3><p>Friendly competition with a thrilling game of foosball at XCS.</p><a class="fac-book" href="#book" data-book data-book-sport="foosball">Book foosball <span aria-hidden="true">&rarr;</span></a></div>
+      </article>
     </div>
   </div>
 </section>

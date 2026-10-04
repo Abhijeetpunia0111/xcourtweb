@@ -8,8 +8,10 @@
 .bp-back { position: absolute; inset: 0; background: rgba(4, 10, 7, .62); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); opacity: 0; transition: opacity .7s var(--ease); }
 .bp.is-open .bp-back { opacity: 1; }
 
-.bp-sheet { position: absolute; left: 0; right: 0; top: 0; max-height: 100svh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
-  background: var(--paper); color: var(--ink); padding-top: calc(var(--nav-top) + 98px);
+/* max-height:100% of the fixed .bp (= the live viewport) — 100svh left a gap at the bottom once the mobile URL bar collapsed.
+   The nav-clearing space is a paper-coloured border, not padding, so it stays put while the content scrolls beneath it. */
+.bp-sheet { position: absolute; left: 0; right: 0; top: 0; max-height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  background: var(--paper); color: var(--ink); border-top: calc(var(--nav-top) + 98px) solid var(--paper);
   clip-path: inset(0 0 100% 0 round 0 0 52px 52px); transition: clip-path .95s var(--ease-io); }
 .bp.is-open .bp-sheet { clip-path: inset(0 0 0 0 round 0 0 0 0); }
 .bp.is-instant, .bp.is-instant * { transition-duration: 0s !important; transition-delay: 0s !important; }
@@ -37,12 +39,10 @@
 /* left — sports as a typographic list, courts as chips */
 .bp-sports { list-style: none; margin: 0 0 30px; padding: 0; border-bottom: 1px solid rgba(7, 18, 13, .12); }
 .bp-sports li { border-top: 1px solid rgba(7, 18, 13, .12); }
-.bp-sport { width: 100%; display: flex; align-items: baseline; gap: 16px; padding: 13px 0; text-align: left; font-family: var(--ui); font-weight: 500; font-size: clamp(24px, 2.5vw, 34px); letter-spacing: -.035em; line-height: 1.1; color: rgba(7, 18, 13, .38); transition: color .3s, padding .5s var(--ease); }
-.bp-sport em { font: 700 11px var(--ui); letter-spacing: .12em; font-style: normal; color: rgba(7, 18, 13, .35); min-width: 22px; }
+.bp-sport { width: 100%; display: flex; align-items: baseline; gap: 16px; padding: 9px 0; text-align: left; font-family: var(--ui); font-weight: 500; font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -.035em; line-height: 1.1; color: rgba(7, 18, 13, .38); transition: color .3s, padding .5s var(--ease); }
 .bp-sport small { margin-left: auto; font: 600 12px var(--ui); letter-spacing: .02em; color: rgba(7, 18, 13, .45); white-space: nowrap; }
 .bp-sport:hover { color: var(--ink); padding-left: 8px; }
 .bp-sport.is-on { color: var(--ink); }
-.bp-sport.is-on em { color: #5a6a14; }
 .bp-sport.is-on span::after { content: ""; display: inline-block; width: 11px; height: 11px; margin-left: 14px; background: var(--lime); border: 1.5px solid var(--ink); vertical-align: middle; }
 
 .bp-courts { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -99,7 +99,7 @@
 .bp-done dt { color: rgba(7, 18, 13, .55); } .bp-done dd { margin: 0; font-weight: 700; }
 .bp-done .bp-cta { width: 100%; }
 /* close button on the result screens: same spot as the one in the booking header */
-.bp-x-done { position: absolute; top: calc(var(--nav-top) + 98px); right: calc(var(--pad) + 10px); }
+.bp-x-done { position: absolute; top: 0; right: calc(var(--pad) + 10px); }
 /* payment failed */
 .bp-tick-x { background: #f6c9c1; color: #a3281b; }
 .bp-fail-msg { margin: -2px 0 0; max-width: 44ch; font-size: 16px; line-height: 1.5; color: rgba(7, 18, 13, .72); }
@@ -111,15 +111,16 @@
 .bp-back-btn { font: 650 13px var(--ui); text-decoration: underline; text-underline-offset: 4px; color: rgba(7, 18, 13, .7); }
 
 @media (max-width: 900px) {
-  .bp-sheet { padding-top: calc(var(--nav-top) + 84px); clip-path: inset(0 0 100% 0 round 0 0 32px 32px); }
+  .bp-sheet { border-top-width: calc(var(--nav-top) + 84px); clip-path: inset(0 0 100% 0 round 0 0 32px 32px); }
   .bp-cols { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .bp-sports { margin-bottom: 22px; }
   .bp-sport { padding: 11px 0; font-size: 24px; }
   .bp-l { margin-bottom: 18px; }
-  .bp-slots { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .bp-slots { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .bp-slot { font-size: 13px; }
   .bp-dates { gap: 4px; }
   .bp-day b { font-size: 17px; }
-  .bp-foot { position: sticky; bottom: 0; z-index: 2; flex-direction: column; align-items: stretch; gap: 12px; margin: 22px calc((var(--pad) + 10px) * -1) 0; padding: 14px calc(var(--pad) + 10px) 16px; background: var(--paper); box-shadow: 0 -12px 30px -18px rgba(0, 0, 0, .25); }
+  .bp-foot { position: sticky; bottom: 0; z-index: 2; flex-direction: column; align-items: stretch; gap: 12px; margin: 22px calc((var(--pad) + 10px) * -1) 0; padding: 14px calc(var(--pad) + 10px) calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--paper); box-shadow: 0 -12px 30px -18px rgba(0, 0, 0, .25); }
   .bp-sum { font-size: 13px; }
   .bp-pay { justify-content: space-between; gap: 14px; }
   .bp-price { text-align: left; } .bp-price strong { font-size: 28px; }

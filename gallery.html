@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script>document.documentElement.classList.add("js")</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gallery | Crosscourt Sports Club</title>
+  <meta name="description" content="Inside Crosscourt Sports Club, Gandipet, Hyderabad: the courts, the pool, the gym and the people. Facilities, premium details, why Crosscourt, and the story behind the club.">
+  <meta name="theme-color" content="#07120d">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@300..800&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/bookpanel.css">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="page-gallery">
+
+<!-- ============ Announcement bar (closeable) ============ -->
+<div class="bar" id="bar">
+  <div class="bar-track"><p>Season is on: <strong>register your team</strong> for the next Crosscourt championship. <a href="index.html#pay-play">See rates</a></p><p class="bar-dup" aria-hidden="true">Season is on: <strong>register your team</strong> for the next Crosscourt championship. <a tabindex="-1" href="index.html#pay-play">See rates</a></p></div>
+  <button class="bar-x" id="barClose" aria-label="Dismiss announcement">
+    <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<!-- ============ Header ============ -->
+<header class="nav" id="nav">
+  <div class="nav-l">
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">
+      <span class="burger" aria-hidden="true"><i></i><i></i></span>
+      <span class="menu-label" aria-hidden="true"><span>Menu</span><span>Close</span></span>
+      <span class="sr">Open menu</span>
+    </button>
+    <i class="nav-sep" aria-hidden="true"></i>
+    <a class="nav-link" href="index.html#book">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span>Book a court</span>
+    </a>
+  </div>
+
+  <a class="logo" href="index.html" aria-label="Crosscourt Sports Club, home">
+    <span class="logo-word">CROSSCOURT</span>
+    <span class="logo-sub">Sports · Hyderabad</span>
+  </a>
+
+  <div class="nav-r">
+    <a class="icon-btn" href="https://maps.google.com/?q=Crosscourt+Sports+Club+Gandipet+Hyderabad" target="_blank" rel="noopener" aria-label="Directions">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>
+    </a>
+    <a class="icon-btn" href="tel:+918019765511" aria-label="Call +91 80197 65511">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+    </a>
+    <a class="pill" href="index.html#book">Book court</a>
+  </div>
+</header>
+
+<!-- ============ Full-screen menu ============ -->
+<nav class="menu" id="menu" aria-label="Main menu" aria-hidden="true">
+  <div class="menu-in">
+    <ul class="menu-links" id="menuLinks">
+      <li><a data-scene="book" data-img="assets/img/menu/book.webp" href="index.html#book" data-copy="Pick a sport, a slot and you're on court in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
+      <li><a data-scene="play" data-img="assets/img/menu/play.webp" href="index.html#pay-play" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
+      <li><a data-scene="member" data-img="assets/img/menu/member.webp" href="index.html#membership" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
+      <li><a data-scene="coach" data-img="assets/img/menu/coach.webp" href="index.html#coaching" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">04</span><span class="ml"><span>Coaching</span></span></a></li>
+      <li><a data-scene="gallery" data-img="assets/img/menu/gallery.webp" href="#top" aria-current="page" data-copy="Moments from tournaments, carnivals and everyday play on court."><span class="mi">05</span><span class="ml"><span>Gallery</span></span></a></li>
+      <li><a data-scene="tournaments" data-img="assets/img/menu/tournaments.webp" href="tournaments.html" data-copy="Open championships across every sport. Do you have what it takes?"><span class="mi">06</span><span class="ml"><span>Tournaments</span></span></a></li>
+    </ul>
+
+    <aside class="menu-side">
+      <div class="menu-feature" id="menuFeature">
+        <div class="menu-art" id="menuArt"></div>
+        <p class="menu-copy" id="menuCopy">Game on. Nonstop playtime.</p>
+      </div>
+      <div class="menu-info">
+        <div><span class="k">Visit</span><p>Sy. No. 365, 366 &amp; 367, Vattinagulapalli Village, Gandipet, Hyderabad 500075</p></div>
+        <div><span class="k">Hours</span><p>Tennis 11 AM – 10 PM<br>All other sports 7 AM – 10 PM</p></div>
+        <div><span class="k">Talk to us</span><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="https://wa.me/918019765511" target="_blank" rel="noopener">WhatsApp</a> · <a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a></p></div>
+      </div>
+    </aside>
+  </div>
+</nav>
+
+<div id="page">
+<main>
+<!-- ============ HERO ============ -->
+<section class="g-hero" id="top" aria-labelledby="gTitle">
+  <img class="g-hero-img" src="assets/img/venue/arena.webp" alt="" decoding="async" fetchpriority="high">
+  <div class="g-hero-shade" aria-hidden="true"></div>
+  <div class="g-hero-in">
+    <p class="kicker">Gallery</p>
+    <h1 id="gTitle"><span class="g-l"><span>Inside</span></span><span class="g-l"><span><em>Crosscourt.</em></span></span></h1>
+    <p class="g-sub">The courts, the pool, the gym and the people who fill them. Take a look around.</p>
+  </div>
+  <nav class="g-jump" aria-label="On this page">
+    <a href="#facilities">Facilities</a><a href="#premium">Premium</a><a href="#moments">Moments</a><a href="#why">Why Crosscourt</a><a href="#founder">The founder</a>
+  </nav>
+</section>
+
+<!-- ============ FACILITIES ============ -->
+<section class="sec g-sec" id="facilities">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Facilities</p>
+      <h2>Everything you need,<br><span>under one roof.</span></h2>
+      <p class="lead">Eight sports, one address. Tap any photo to see it larger.</p>
+    </header>
+    <div class="g-bento">
+      <article class="g-tile g-arena" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/arena.webp" aria-label="Open photo: The covered pickleball arena at sunset">
+        <img src="assets/img/venue/arena.webp" alt="The covered pickleball arena at sunset" loading="lazy" decoding="async" style="object-position:50% 60%">
+        <div class="g-cap"><span class="fac-n">12 courts</span><h3>Covered pickleball arena</h3><p>Twelve semi-indoor courts, rain or shine, day or night.</p></div>
+      </article>
+      <article class="g-tile g-pool" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/pool.webp" aria-label="Open photo: The indoor swimming pool">
+        <img src="assets/img/venue/pool.webp" alt="The indoor swimming pool" loading="lazy" decoding="async" style="object-position:50% 70%">
+        <div class="g-cap"><span class="fac-n">Pool</span><h3>Swimming pool</h3><p>Temperature-controlled and open from early morning.</p></div>
+      </article>
+      <article class="g-tile g-tennis" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/tennis.webp" aria-label="Open photo: A covered tennis court">
+        <img src="assets/img/venue/tennis.webp" alt="A covered tennis court" loading="lazy" decoding="async" style="object-position:50% 70%">
+        <div class="g-cap"><span class="fac-n">04+1</span><h3>Tennis courts</h3><p>ITF-standard courts and a dedicated center court.</p></div>
+      </article>
+      <article class="g-tile g-gym" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/gym.webp" aria-label="Open photo: The gym floor">
+        <img src="assets/img/venue/gym.webp" alt="The gym floor" loading="lazy" decoding="async" style="object-position:50% 60%">
+        <div class="g-cap"><span class="fac-n">Gym</span><h3>High-performance gym</h3><p>A fully equipped floor for every fitness journey.</p></div>
+      </article>
+      <article class="g-tile g-turf" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/turf.webp" aria-label="Open photo: The football turf">
+        <img src="assets/img/venue/turf.webp" alt="The football turf" loading="lazy" decoding="async" style="object-position:50% 75%">
+        <div class="g-cap"><span class="fac-n">Turf</span><h3>Box football &amp; cricket</h3><p>Fast, floodlit turf and a netted arena for quick games.</p></div>
+      </article>
+      <article class="g-tile g-lounge" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/lounge.webp" aria-label="Open photo: The courtside lounge under a tree">
+        <img src="assets/img/venue/lounge.webp" alt="The courtside lounge under a tree" loading="lazy" decoding="async" style="object-position:50% 65%">
+        <div class="g-cap"><span class="fac-n">Lounge</span><h3>Courtside lounge</h3><p>Shaded seating under the trees between games.</p></div>
+      </article>
+      <article class="g-tile g-track" data-reveal tabindex="0" role="button" data-lb="assets/img/venue/track.webp" aria-label="Open photo: The running track and lawns">
+        <img src="assets/img/venue/track.webp" alt="The running track and lawns" loading="lazy" decoding="async" style="object-position:50% 70%">
+        <div class="g-cap"><span class="fac-n">Run</span><h3>Track &amp; lawns</h3><p>Open space for warm-ups, walks and events.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PREMIUM ============ -->
+<section class="sec g-premium" id="premium">
+  <div class="wrap g-prem-grid">
+    <figure class="g-prem-img" data-reveal data-lb="assets/img/venue/sunset.webp" tabindex="0" role="button" aria-label="Open photo: Golden hour over the covered courts">
+      <img src="assets/img/venue/sunset.webp" alt="Golden hour over the covered courts" loading="lazy" decoding="async">
+      <figcaption>Golden hour over the courts</figcaption>
+    </figure>
+    <div class="g-prem-txt">
+      <header class="sec-head" data-reveal>
+        <p class="kicker">Premium</p>
+        <h2>Premium,<br><span>down to the detail.</span></h2>
+        <p class="lead">Good enough for a tournament, comfortable enough for a Tuesday evening.</p>
+      </header>
+      <ol class="g-pillars">
+        <li data-reveal><span>01</span><h3>Pro-standard surfaces</h3><p>ITF-standard tennis courts and line-perfect pickleball courts: the same kit you'd see at a championship.</p></li>
+        <li data-reveal><span>02</span><h3>Covered and floodlit</h3><p>Shaded, semi-indoor arenas and floodlit turf mean the game goes on at 7 AM or 10 PM, rain or shine.</p></li>
+        <li data-reveal><span>03</span><h3>Pool, gym and lounge</h3><p>A temperature-controlled pool, a high-performance gym and a shaded lounge, all on one campus.</p></li>
+        <li data-reveal><span>04</span><h3>Coaching on site</h3><p>XCS Tennis Academy and structured sessions for every level, from first rally to match play.</p></li>
+      </ol>
+    </div>
+  </div>
+  <div class="wrap g-prem-strip">
+    <figure data-reveal data-lb="assets/img/moments/aerial-courts.webp" tabindex="0" role="button" aria-label="Open photo: Tennis courts from above"><img src="assets/img/moments/aerial-courts.webp" alt="Tennis courts from above" loading="lazy" decoding="async"><figcaption>Tennis, from above</figcaption></figure>
+    <figure data-reveal data-lb="assets/img/moments/night-aerial.webp" tabindex="0" role="button" aria-label="Open photo: The club at night, floodlights on"><img src="assets/img/moments/night-aerial.webp" alt="The club at night, floodlights on" loading="lazy" decoding="async"><figcaption>Floodlights on</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ MOMENTS ============ -->
+<section class="sec g-sec" id="moments">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Moments</p>
+      <h2>Played<br><span>to the last point.</span></h2>
+      <p class="lead">Tournaments, carnivals and everyday games from around the club.</p>
+    </header>
+    <div class="g-masonry">
+        <button class="g-shot" type="button" data-lb="assets/img/moments/winners-podium.webp" data-reveal aria-label="Open photo: Winners with paddles at the Hyderabad Open"><img src="assets/img/moments/winners-podium.webp" alt="Winners with paddles at the Hyderabad Open" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/pickleball-action.webp" data-reveal aria-label="Open photo: Pickleball rally under the Crosscourt banner"><img src="assets/img/moments/pickleball-action.webp" alt="Pickleball rally under the Crosscourt banner" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/trophy-presentation.webp" data-reveal aria-label="Open photo: Trophy presentation on court, under the lights"><img src="assets/img/moments/trophy-presentation.webp" alt="Trophy presentation on court, under the lights" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/aerial-courts.webp" data-reveal aria-label="Open photo: Tennis courts from above"><img src="assets/img/moments/aerial-courts.webp" alt="Tennis courts from above" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/prize-cheque.webp" data-reveal aria-label="Open photo: Prize cheque ceremony"><img src="assets/img/moments/prize-cheque.webp" alt="Prize cheque ceremony" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/tennis-ready.webp" data-reveal aria-label="Open photo: Junior tennis player in the ready position"><img src="assets/img/moments/tennis-ready.webp" alt="Junior tennis player in the ready position" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/carnival-crowd.webp" data-reveal aria-label="Open photo: The crowd at the XCS Sports Carnival"><img src="assets/img/moments/carnival-crowd.webp" alt="The crowd at the XCS Sports Carnival" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/net-player.webp" data-reveal aria-label="Open photo: Player at the net"><img src="assets/img/moments/net-player.webp" alt="Player at the net" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/carnival-gate.webp" data-reveal aria-label="Open photo: Entrance to the XCS Sports Carnival"><img src="assets/img/moments/carnival-gate.webp" alt="Entrance to the XCS Sports Carnival" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/night-aerial.webp" data-reveal aria-label="Open photo: The club at night, floodlights on"><img src="assets/img/moments/night-aerial.webp" alt="The club at night, floodlights on" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/group-trophy.webp" data-reveal aria-label="Open photo: Champion with his team and trophy"><img src="assets/img/moments/group-trophy.webp" alt="Champion with his team and trophy" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/box-cricket.webp" data-reveal aria-label="Open photo: A box cricket game in progress"><img src="assets/img/moments/box-cricket.webp" alt="A box cricket game in progress" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/winner.webp" data-reveal aria-label="Open photo: Junior champion with her trophy"><img src="assets/img/moments/winner.webp" alt="Junior champion with her trophy" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/award-handover.webp" data-reveal aria-label="Open photo: Award handover at the Hyderabad Open"><img src="assets/img/moments/award-handover.webp" alt="Award handover at the Hyderabad Open" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/pickleball-courts.webp" data-reveal aria-label="Open photo: Pickleball courts from above"><img src="assets/img/moments/pickleball-courts.webp" alt="Pickleball courts from above" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/carrom.webp" data-reveal aria-label="Open photo: Friends playing carrom at the carnival"><img src="assets/img/moments/carrom.webp" alt="Friends playing carrom at the carnival" loading="lazy" decoding="async"></button>
+        <button class="g-shot" type="button" data-lb="assets/img/moments/football-cage.webp" data-reveal aria-label="Open photo: The football cage from the air"><img src="assets/img/moments/football-cage.webp" alt="The football cage from the air" loading="lazy" decoding="async"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY CROSSCOURT ============ -->
+<section class="sec sec-light" id="why">
+  <div class="wrap">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Why Crosscourt</p>
+      <h2>Built for people<br><span>who actually play.</span></h2>
+    </header>
+    <div class="stats">
+      <div class="stat" data-reveal><b data-count="365">0</b><span>days open a year</span></div>
+      <div class="stat" data-reveal><b data-count="12">0</b><span>pickleball courts</span></div>
+      <div class="stat" data-reveal><b data-count="4">0</b><span>tennis courts, plus a center court</span></div>
+      <div class="stat" data-reveal><b data-count="8">0</b><span>sports under one roof</span></div>
+    </div>
+    <ol class="why">
+      <li data-reveal><span>01</span><h3>Pro-standard surfaces</h3><p>ITF-standard tennis courts and competition-ready tables. The same kit you'd see at a tournament.</p></li>
+      <li data-reveal><span>02</span><h3>Book in seconds</h3><p>Choose a sport, a slot and a duration. Fast form, instant price, no phone tag.</p></li>
+      <li data-reveal><span>03</span><h3>Fair, flexible pricing</h3><p>Simple hourly peak and off-peak rates. Play when it suits you; pay for what you use.</p></li>
+      <li data-reveal><span>04</span><h3>Everything on site</h3><p>Lockers, change rooms, a gym, a pool and a coaching academy. One visit covers it all.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ ABOUT THE FOUNDER (last) ============ -->
+<section class="sec g-founder" id="founder">
+  <div class="wrap g-founder-grid">
+    <figure class="g-portrait" data-reveal>
+      <img src="assets/img/founder.webp" alt="Portrait of the founder of Crosscourt Sports Club" loading="lazy" decoding="async">
+    </figure>
+    <div class="g-founder-txt">
+      <header class="sec-head" data-reveal>
+        <p class="kicker">About the founder</p>
+        <h2>A home in Hyderabad<br><span>for every sport.</span></h2>
+      </header>
+      <!-- TODO (content): add the founder's name, real bio and a personal quote. The copy below is generic, built only from facts already on the site. -->
+      <div class="g-bio" data-reveal>
+        <p>Crosscourt Sports Club began with a simple idea: one address in Hyderabad where anyone can walk in, pick a sport and play, with courts, coaching and a community that match the ambition of the people using them.</p>
+        <p>Today the club runs eight sports across ITF-standard courts, a pool, a gym and a shaded lounge, open 365 days a year in Gandipet.</p>
+      </div>
+      <blockquote class="g-quote" data-reveal>Game on. Nonstop playtime.</blockquote>
+      <p class="g-role" data-reveal><b>Founder &amp; Managing Director</b>Crosscourt Sports Club</p>
+      <div class="g-cta" data-reveal>
+        <a class="btn-lime" href="#book" data-book>Book a court</a>
+        <a class="g-ghost" href="https://wa.me/918019765511" target="_blank" rel="noopener">Chat on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <div class="foot-top">
+      <h2>Game on.<br><span>Nonstop playtime.</span></h2>
+      <a class="btn-lime" href="https://wa.me/918019765511" target="_blank" rel="noopener">Chat on WhatsApp</a>
+    </div>
+    <div class="foot-cols">
+      <div><h4>Visit</h4><p>Sy. No. 365, 366 &amp; 367,<br>Vattinagulapalli Village,<br>Gandipet, Hyderabad<br>Telangana 500075</p></div>
+      <div><h4>Hours</h4><p>Tennis · 11 AM – 10 PM<br>Everything else · 7 AM – 10 PM<br>Open 365 days</p></div>
+      <div><h4>Contact</h4><p><a href="tel:+918019765511">+91 80197 65511</a><br><a href="mailto:hello@example.com">hello@example.com</a></p></div>
+      <div><h4>Follow</h4><p><a href="https://instagram.com/crosscourtsports.xcs" target="_blank" rel="noopener">Instagram</a><br><a href="#">Facebook</a><br><a href="#">YouTube</a></p></div>
+    </div>
+    <div class="foot-word" aria-hidden="true">CROSSCOURT</div>
+    <div class="foot-bot"><span>© 2026 Crosscourt Sports Club. All rights reserved.</span><span>Privacy · Terms</span></div>
+  </div>
+</footer>
+
+</div><!-- /#page -->
+
+<a class="to-top" id="toTop" href="#top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</a>
+
+
+<!-- lightbox -->
+<div class="g-lb" id="gLb" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <img id="gLbImg" alt="">
+  <button class="g-lb-x" id="gLbX" type="button" aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <button class="g-lb-p" id="gLbP" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <button class="g-lb-n" id="gLbN" type="button" aria-label="Next"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/fit.js"></script>
+<script src="js/totop.js"></script>
+<script src="js/bookpanel.js"></script>
+<script src="js/gallery.js"></script>
+</body>
+</html>

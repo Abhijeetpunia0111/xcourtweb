@@ -96,7 +96,7 @@
         <div><small>Entry / ${t.unit}</small><b>${inr(t.fee)}</b></div>
         <div><small>Prize pool</small><b>${inr(t.prize)}</b></div>
       </div>
-      <div class="t-spots"><div class="bar-track"><i style="width:${Math.round((taken / t.cap) * 100)}%"></i></div><small><span>${taken} of ${t.cap} registered</span><span>${t.time}</span></small></div>
+      <div class="t-spots"><div class="spots-track"><i style="width:${Math.round((taken / t.cap) * 100)}%"></i></div><small><span>${taken} of ${t.cap} registered</span><span>${t.time}</span></small></div>
       <button class="t-reg" data-id="${t.id}" ${reg || full ? 'disabled' : ''}>${reg ? 'Registered ✓' : full ? 'Draw full' : 'Register'}</button>
     </article>`;
   }
@@ -132,50 +132,37 @@
      Account
   ---------------------------------------------------------- */
   function renderAccount() {
-    const uniq = new Set(regs.map((r) => r.sport)).size;
-
-    // profile
+        // alert sign-up (name, phone and email are all required)
     $('#profileCard').innerHTML = profile
-      ? `<div class="who"><div class="avatar">${esc(profile.name.trim()[0] || 'P').toUpperCase()}</div><div><h3>${esc(profile.name)}</h3><p>Player since ${dShort(profile.since)} · ${esc(profile.phone)}</p></div></div>
-         <div class="acct-actions"><a class="btn-solid" href="#upcoming">Find a tournament</a><button class="btn-ghost" id="signOut" type="button">Sign out</button></div>`
-      : `<h3 class="dk-t">Create your player profile</h3><p class="dk-s">Takes ten seconds. Saved on this device only (demo). No password needed.</p>
+      ? `<h3 class="al-t">You're on the list, ${esc(profile.name.trim().split(/\s+/)[0])}.</h3>
+         <p class="al-s">We'll message ${esc(profile.phone)}${profile.email ? ' and email ' + esc(profile.email) : ''} when new tournaments open for registration.</p>
+         <div class="acct-actions"><a class="btn-line" href="#upcoming">Find a tournament</a><button class="btn-line btn-line-quiet" id="signOut" type="button">Use different details</button></div>`
+      : `<h3 class="al-t">Register to get notified</h3><p class="al-s">New tournaments, draws and results, sent straight to you. No password needed.</p>
          <form id="profileForm" novalidate>
-           <label class="field"><span>Name</span><input name="name" autocomplete="name" placeholder="e.g. Aarav Reddy" required></label>
-           <label class="field"><span>Phone / WhatsApp</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile number" required></label>
-           <button class="btn-solid" type="submit">Create profile</button>
+           <label class="al-field"><span>Name</span><input name="name" autocomplete="name" placeholder="Your full name" required></label>
+           <label class="al-field"><span>Phone / WhatsApp</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile number" required></label>
+           <label class="al-field"><span>Email</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+           <button class="btn-line" type="submit">Notify me</button>
          </form>`;
 
-    // registrations
-    $('#regsCard').innerHTML = `<h3 class="dk-t">My registrations</h3>` + (regs.length
-      ? `<div class="reg-list">${regs.map((r) => `<div class="reg-item">${Badge(r.sport)}<div><b>${esc(r.title)}</b><small>${dLong(r.date)}${r.team ? ' · ' + esc(r.team) : ''}</small></div></div>`).join('')}</div>`
-      : `<p class="reg-empty">Nothing yet. Pick a tournament above and your entries will show up here.</p>`);
-
-    // achievements
-    const ACH = [
-      { kind: 'star', title: 'Rookie', desc: 'Create your player profile', done: !!profile, when: profile && dShort(profile.since) },
-      { kind: 'ticket', title: 'In the draw', desc: 'Register for a tournament', done: regs.length >= 1, prog: [Math.min(regs.length, 1), 1] },
-      { kind: 'rings', title: 'Multi-sport', desc: 'Enter two different sports', done: uniq >= 2, prog: [Math.min(uniq, 2), 2] },
-      { kind: 'crown', title: 'Champion', desc: 'Win a tournament', done: false, prog: [0, 1] },
-    ];
-    $('#cabinet').innerHTML = ACH.map((a) => `<div class="ach">${Badge(a.kind, { locked: !a.done })}<b>${a.title}</b>
-      ${a.done ? `<small>${a.when || 'Unlocked'}</small>` : `<small>${a.desc}</small>${a.prog ? `<div class="prog"><i style="width:${(a.prog[0] / a.prog[1]) * 100}%"></i></div>` : ''}`}</div>`).join('');
-
-    // records
-    const next = regs.map((r) => new Date(r.date)).filter((d) => d >= new Date(new Date().setHours(0, 0, 0, 0))).sort((a, b) => a - b)[0];
-    $('#records').innerHTML = [[regs.length, 'Tournaments entered'], [uniq, 'Sports tried'], [next ? dShort(next) : 'None', 'Next event']].map(([v, l]) => `<div class="rec"><b>${v}</b><small>${l}</small></div>`).join('');
+    // registrations (only once there are some)
+    $('#regsCard').innerHTML = regs.length
+      ? `<h3 class="al-t al-t-sm">My registrations</h3><div class="reg-list">${regs.map((r) => `<div class="reg-item">${Badge(r.sport)}<div><b>${esc(r.title)}</b><small>${dLong(r.date)}${r.team ? ' · ' + esc(r.team) : ''}</small></div></div>`).join('')}</div>`
+      : '';
   }
 
   document.addEventListener('submit', (e) => {
     if (e.target.id !== 'profileForm') return;
     e.preventDefault();
-    const f = new FormData(e.target), name = (f.get('name') || '').trim(), phone = (f.get('phone') || '').replace(/\D/g, '');
-    if (!name || phone.length < 10) return toast('Enter your name and a 10-digit phone number');
-    profile = { name, phone: phone.slice(-10), since: new Date().toISOString() };
-    store.set('xcs_profile', profile); renderAccount(); renderUp(false); toast('Profile created. Rookie badge unlocked');
+    const f = new FormData(e.target), name = (f.get('name') || '').trim(), phone = (f.get('phone') || '').replace(/\D/g, ''), email = (f.get('email') || '').trim();
+    if (!name || phone.length < 10 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return toast('Enter your name, a 10-digit phone number and a valid email');
+    // TODO: send { name, phone, email } to the club's notification list / CRM. For now it is kept in this browser only.
+    profile = { name, phone: phone.slice(-10), email, since: new Date().toISOString() };
+    store.set('xcs_profile', profile); renderAccount(); renderUp(false); toast("You're on the list. We'll notify you");
   });
   document.addEventListener('click', (e) => {
     if (e.target.id !== 'signOut') return;
-    profile = null; regs = []; store.del('xcs_profile'); store.del('xcs_regs'); renderAccount(); renderUp(false); toast('Signed out');
+    profile = null; store.del('xcs_profile'); renderAccount(); renderUp(false);
   });
 
   /* ----------------------------------------------------------
