@@ -3,7 +3,13 @@
 Plain HTML/CSS/JS (GSAP + Lenis vendored in `vendor/`).
 Open `index.html`, or serve the folder (`npx serve .`) for best results.
 
-## Leo Cal key (booking widget)
+## Leo Cal (booking)
+
+The hero booking card and the booking panel are this site's own UI, filled with Leo Cal's real data: `js/leocal.js` reads
+the branches, sports, courts, durations, prices and free slots from `https://api.turfleo.com` with the venue's publishable
+key. "Confirm & Pay" opens Leo Cal's pop-up (`cal.turfleo.com/v1/embed.js`) on the chosen slot, where the visitor enters
+their details and pays. (The pop-up opens straight on the details step with the current Leo Cal build — gamexo
+`pnpm cal:deploy`; an older `embed.js` opens it on its own picker, with the branch / sport / court preselected.)
 
 The pages only carry the placeholder `data-key="gxp_YOUR_KEY"`, so the real key never goes into git. The one build step,
 `node tools/build.mjs`, copies the site to `dist/` (gitignored) with the key from the `LEO_CAL_KEY` env var filled in;
@@ -11,10 +17,11 @@ Vercel runs it and serves `dist/` (`vercel.json`).
 
 - Vercel: Project → Settings → Environment Variables → `LEO_CAL_KEY` (Production + Preview), then redeploy.
 - Local: put `LEO_CAL_KEY=gxp_…` in `.env.local` (gitignored), then `node tools/build.mjs && npx serve dist`.
-  Opening the source pages directly still works, but the widget answers 401 there (placeholder key).
+  Opening the source pages directly still works, but the booking card says online booking isn't set up (placeholder key).
 
-The key still reaches every visitor's browser (it's in the booking iframe's URL), so it is not a secret: what protects it
-is the allowed origins for the key in Leo Cal. Add the production domain there, plus localhost / preview domains if you test on them.
+The key still reaches every visitor's browser, so it is not a secret: what protects it is the allowed origins for the key
+in Leo Cal. The API only answers websites on that list, so add the production domain there, plus localhost / preview
+domains if you test on them — otherwise the booking card shows "Couldn't reach the booking system".
 
 ## Hero videos (14s per sport)
 
@@ -74,20 +81,21 @@ The photos were cut from the venue shoot (`XCS Venue images`; the `.dng` RAWs ne
 
 Tennis, Pickleball, Swimming, Gym, Table Tennis, Box Cricket, Football, Foosball.
 - Carousel slides = the 5 entries in `SPORTS` (`js/main.js`) without `extra: true` (they have hero media).
-- Gym / Table Tennis / Foosball are `extra: true` booking-only sports: they appear in the booking card, the booking panel (`js/bookpanel.js`, same list) and the Facilities cards, but not as carousel slides (no hero photo/video yet — add one, drop `extra`, and it becomes a slide).
-- Their court names/counts and hours are placeholders (rates are the real Pay & Play ones). Confirm with the club.
+- Gym / Table Tennis / Foosball are `extra: true`: no carousel slide (no hero photo/video yet — add one, drop `extra`, and it becomes a slide), but their Facilities links still book them.
+- What can be booked — courts, hours, durations, prices — comes from Leo Cal. A slide or a `data-book-sport` link is matched to Leo Cal's sport by name (`cricket` → "Box Cricket").
 - Tournaments page still lists 6 competitive sports (no gym / foosball events yet).
 
 ## Booking panel (all pages)
 
 `js/bookpanel.js` + `css/bookpanel.css` — a panel that drops from the top like the menu: sport + court on the left, date + duration + time on the right.
 Every "Book a court" / "Book court" link opens it, on every page, **except** while the home-page hero is on screen (there the hero's own booking card is used).
-Its rates / peak rule / availability mirror `SPORTS`, `isPeak`, `isBooked` in `js/main.js` — if you change one, change the other. Confirm still hands off to WhatsApp (replace with the real booking API).
+Same Leo Cal data and checkout as the hero card (see "Leo Cal" above).
+
 ## Branches
 
-`js/branches.js` holds the branch list (`BRANCHES`: name, area, lat/lng) and the selected branch, shared by the hero card and the booking panel (load it before `main.js` / `bookpanel.js` on every page).
-The default is the branch nearest the visitor: if they already allowed location it's used on load, otherwise location is asked for on their first interaction with the booking card / panel (never as a cold prompt on page load). If it's refused, the first branch is used and the hero's branch menu offers "Find my nearest branch". A branch picked by hand wins and is kept for the visit, across pages.
-Simulated availability differs per branch. **Only Gandipet is real; the other branches are placeholders** — replace them. Every branch currently offers the same sports, courts and rates.
+The branch list is Leo Cal's. `js/branches.js` holds the selected branch, shared by the hero card and the booking panel (load order on every page: `leocal.js`, `branches.js`, then `main.js` / `bookpanel.js`).
+The default is the branch nearest the visitor: if they already allowed location it's used on load, otherwise location is asked for on their first interaction with the booking card / panel (never as a cold prompt on page load). If it's refused, the first branch that can take a payment is used and the hero's branch menu offers "Find my nearest branch". A branch picked by hand wins and is kept for the visit, across pages.
+Leo Cal has no map positions, so they live in `POSITIONS` in `js/branches.js`, by branch name (Gandipet's is approximate). With fewer than two positioned branches there is no "nearest" and location is never asked for.
 
 Note: nothing on the page may use `id="book"` (the hero card is `#bookCard`) — a native anchor jump into the overflow-hidden hero breaks its layout.
 
@@ -102,12 +110,10 @@ Not loaded by any page right now (it was the tournaments hero before the video).
 - Rebuild: `npm i three esbuild`, then `esbuild js/src/trophy3d.src.js --bundle --minify --format=iife --target=es2019 --outfile=vendor/trophy3d.min.js`.
 - Look is tuned in the file: `silver` / `gold` materials, the `studio()` environment (softboxes/flags = the reflections), cup shape in `cupR()`.
 
-## Things to confirm with the club (in `js/main.js` → `SPORTS` / `isPeak`)
+## Things to confirm with the club
 
-- **Peak rule** - the live site only says "peak / off-peak". Assumed: weekends all day, weekdays from 5 PM.
-- **Court names/counts** - 12 pickleball + 4 tennis + center court come from third-party listings; box cricket / football / pool are single-resource placeholders.
-- **Availability** is simulated (seeded random). Replace `isBooked()` with a real API.
-- **Confirm & Pay** currently opens a WhatsApp message to +91 80197 65511. Hook your payment/booking API in the `#bkCta` click handler.
+- **Leo Cal setup** - branches, courts, durations, prices and peak hours all come from the club's Leo Cal account; the site's domains must be in the key's allowed origins.
+- **Branch positions** - one per branch in `POSITIONS` (`js/branches.js`) for "nearest branch".
 - Dummy copy: Facilities, Why Crosscourt, Membership blurbs, promo-card text, footer email.
 
 ## Structure

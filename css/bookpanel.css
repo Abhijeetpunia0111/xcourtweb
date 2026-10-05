@@ -16,12 +16,11 @@
 .bp.is-open .bp-sheet { clip-path: inset(0 0 0 0 round 0 0 0 0); }
 .bp.is-instant, .bp.is-instant * { transition-duration: 0s !important; transition-delay: 0s !important; }
 
-.bp-in, .bp-done { width: min(1240px, 100%); margin: 0 auto; padding: 0 calc(var(--pad) + 10px) 30px; }
-.bp-in[hidden], .bp-done[hidden] { display: none; }
+.bp-in { width: min(1240px, 100%); margin: 0 auto; padding: 0 calc(var(--pad) + 10px) 30px; }
 
 /* staged reveal */
-.bp-head, .bp-l, .bp-r, .bp-foot, .bp-done > * { opacity: 0; transform: translateY(30px); transition: opacity .7s var(--ease), transform 1s var(--ease); }
-.bp.is-open .bp-head, .bp.is-open .bp-l, .bp.is-open .bp-r, .bp.is-open .bp-foot, .bp.is-open .bp-done > * { opacity: 1; transform: none; transition-delay: calc(.32s + var(--d, 0) * .09s); }
+.bp-head, .bp-l, .bp-r, .bp-foot { opacity: 0; transform: translateY(30px); transition: opacity .7s var(--ease), transform 1s var(--ease); }
+.bp.is-open .bp-head, .bp.is-open .bp-l, .bp.is-open .bp-r, .bp.is-open .bp-foot { opacity: 1; transform: none; transition-delay: calc(.32s + var(--d, 0) * .09s); }
 .bp-head { --d: 0; } .bp-l { --d: 1; } .bp-r { --d: 2; } .bp-foot { --d: 4; }
 
 /* title on the left; branch picker + close on the right (the picker drops under the title on narrow phones) */
@@ -100,25 +99,11 @@
 .bp-cta svg { transition: transform .5s var(--ease); }
 .bp-cta:hover:not(:disabled) svg { transform: translateX(4px); }
 
-/* confirmation */
-.bp-done { text-align: center; max-width: 560px; padding-bottom: 54px; display: grid; justify-items: center; gap: 18px; }
-.bp-tick { width: 60px; height: 60px; display: grid; place-items: center; background: var(--lime); border: 1.5px solid var(--ink); }
-.bp-done h3 { margin: 0; font: 300 clamp(30px, 4vw, 44px)/1 var(--ui); letter-spacing: -.04em; }
-.bp-done dl { width: 100%; margin: 6px 0 4px; border-top: 1px solid rgba(7, 18, 13, .15); }
-.bp-done dl div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(7, 18, 13, .15); font-size: 15px; }
-.bp-done dt { color: rgba(7, 18, 13, .55); } .bp-done dd { margin: 0; font-weight: 700; }
-.bp-done .bp-cta { width: 100%; }
-/* close button on the result screens: same spot as the one in the booking header */
-.bp-x-done { position: absolute; top: 0; right: calc(var(--pad) + 10px); }
-/* payment failed */
-.bp-tick-x { background: #f6c9c1; color: #a3281b; }
-.bp-fail-msg { margin: -2px 0 0; max-width: 44ch; font-size: 16px; line-height: 1.5; color: rgba(7, 18, 13, .72); }
-.bp-fail dl { margin-top: 2px; }
-.bp-cta-ghost { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
-.bp-cta-ghost:hover { background: var(--ink); color: var(--paper); transform: translateY(-2px); }
-.bp-spin { width: 16px; height: 16px; border: 2px solid rgba(21, 22, 9, .25); border-top-color: #151609; animation: bpSpin .7s linear infinite; }
-@keyframes bpSpin { to { transform: rotate(360deg); } }
-.bp-back-btn { font: 650 13px var(--ui); text-decoration: underline; text-underline-offset: 4px; color: rgba(7, 18, 13, .7); }
+/* waiting for Leo Cal (js/leocal.js) */
+.bp-skel { pointer-events: none; animation: bpWait 1.1s ease-in-out infinite alternate; }
+.bp-slot.bp-skel { height: 52px; }
+.bp-sport.bp-skel { display: block; width: 55%; height: 24px; margin: 13px 0; padding: 0; background: #ecebdf; }
+@keyframes bpWait { to { opacity: .45; } }
 
 @media (max-width: 900px) {
   .bp-sheet { border-top-width: calc(var(--nav-top) + 84px); clip-path: inset(0 0 100% 0 round 0 0 32px 32px); }
@@ -141,5 +126,5 @@
   .bp-branch { justify-self: start; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bp-sheet, .bp-back, .bp-head, .bp-l, .bp-r, .bp-foot, .bp-done > * { transition-duration: .01s !important; transition-delay: 0s !important; }
+  .bp-sheet, .bp-back, .bp-head, .bp-l, .bp-r, .bp-foot { transition-duration: .01s !important; transition-delay: 0s !important; }
 }
