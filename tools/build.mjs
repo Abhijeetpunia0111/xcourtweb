@@ -28,9 +28,12 @@ for (const file of ['.env.local', '.env']) {
   }
 }
 
-const key = process.env.LEO_CAL_KEY;
+// pasted with a stray space or quotes around it is still the key
+const key = (process.env.LEO_CAL_KEY || '').trim().replace(/^(['"])(.*)\1$/, '$2');
 const fail = (msg) => { console.error(`build: ${msg}`); process.exit(1); };
-if (!key || key === PLACEHOLDER) fail('LEO_CAL_KEY is not set (Vercel env var, or .env.local for local builds).');
+// on Vercel, say which environment is missing it: a branch deploy is "preview", and env vars are set per environment
+const where = process.env.VERCEL_ENV ? ` for Vercel's "${process.env.VERCEL_ENV}" environment${process.env.VERCEL_GIT_COMMIT_REF ? ` (branch ${process.env.VERCEL_GIT_COMMIT_REF})` : ''}` : '';
+if (!key || key === PLACEHOLDER) fail(`LEO_CAL_KEY is not set${where}. Vercel: Settings → Environment Variables, tick Production and Preview, then redeploy. Local builds: .env.local.`);
 if (!key.startsWith('gxp_') || /[\s"'<>&]/.test(key)) fail('LEO_CAL_KEY does not look like a Leo Cal key (gxp_…).');
 
 rmSync(OUT, { recursive: true, force: true });

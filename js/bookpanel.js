@@ -3,71 +3,53 @@
    "Book a court" link, on every page, EXCEPT while the home-page
    hero carousel is on screen (there the hero's own booking card is used).
 
-   Left:  sport + court        Right: date + duration + start time
-   Same rates / peak rule / simulated availability as the hero card.
-   A link with data-book-sport="<sport id>" opens it with that sport selected.
-   (Config below mirrors SPORTS / isPeak / isBooked in js/main.js — keep them in sync.)
+   Header: branch picker.   Left: sport + court.   Right: date + duration + start time.
+   Real courts, prices and free slots from Leo Cal (js/leocal.js), same as the hero card; "Confirm & Pay" opens
+   Leo Cal's pop-up on the chosen slot for the visitor's details and the payment.
+   A link with data-book-sport="<sport>" opens it with that sport selected (matched to Leo Cal's sports by name).
    ========================================================== */
 (() => {
   'use strict';
 
-  /* ---------- config (mirror of main.js) ---------- */
-  const WHATSAPP = '918019765511';
+  const Leo = window.XCSLeo;             // shared with the hero card (js/leocal.js)
   const Branches = window.XCSBranches;   // shared with the hero card (js/branches.js)
-  const isPeak = (date, t) => date.getDay() === 0 || date.getDay() === 6 || t >= 17;
-  const SPORTS = [
-    { id: 'tennis', name: 'Tennis', rate: [1100, 800], open: [11, 22], courts: [['Center Court', 'Show court'], ['Court 01'], ['Court 02'], ['Court 03'], ['Court 04']] },
-    { id: 'pickleball', name: 'Pickleball', rate: [750, 500], open: [7, 22], courts: Array.from({ length: 12 }, (_, i) => ['Court ' + String(i + 1).padStart(2, '0'), 'Semi-indoor']) },
-    { id: 'cricket', name: 'Box Cricket', rate: [1250, 1000], open: [7, 22], courts: [['Box Cricket Arena', 'Netted']] },
-    { id: 'football', name: 'Football', rate: [1250, 1000], open: [7, 22], courts: [['Box Football Arena', 'Turf']] },
-    { id: 'swimming', name: 'Swimming', rate: [500, 250], open: [7, 22], courts: [['Main Pool', 'Lap lanes']] },
-    { id: 'gym', name: 'Gym', rate: [500, 250], open: [7, 22], courts: [['Gym Floor', 'High-performance']] },
-    { id: 'tabletennis', name: 'Table Tennis', rate: [500, 250], open: [7, 22], courts: [['Table 01', 'Competition-ready'], ['Table 02', 'Competition-ready']] },
-    { id: 'foosball', name: 'Foosball', rate: [300, 200], open: [7, 22], courts: [['Foosball Table', 'Aerofit']] },
-  ];
-  const DURS = [1, 1.5, 2];
 
   /* ---------- helpers ---------- */
   const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
-  const h12 = (h) => `${Math.floor(h) % 12 || 12}${h % 1 ? ':30' : ''} ${h < 12 || h >= 24 ? 'AM' : 'PM'}`;
-  const sameDay = (a, b) => a.toDateString() === b.toDateString();
-  const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
-    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967295; };
-  const isBooked = (sp, court, date, hour) => {
-    const wk = date.getDay() === 0 || date.getDay() === 6;
-    const p = (hour >= 17 && hour < 21 ? 0.55 : 0.26) + (wk ? 0.1 : 0);
-    return hash(`${Branches.current().id}|${sp.id}|${court}|${date.toDateString()}|${hour}`) < p;
-  };
-  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
-  const days = Array.from({ length: 14 }, (_, i) => { const d = new Date(today0); d.setDate(d.getDate() + i); return d; });
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  const st = { sport: 0, court: 0, date: 0, dur: 1, start: null };
-  const sp = () => SPORTS[st.sport];
-  const date = () => days[st.date];
+  const st = { sportId: null, courtId: null, day: null, dur: null, start: null };   // start = the chosen slot's starts_at
+  let wantSport = null;          // from a data-book-sport link, applied once Leo Cal's sports are known
+  let autoDay = true;            // once, when the first times arrive: nothing left today (late evening) → tomorrow
+  const curSport = () => Leo.config().sports.find((s) => s.id === st.sportId);
+  const curCourt = () => Leo.config().courts.find((c) => c.id === st.courtId);
 
-  function slotHours() { const [o, c] = sp().open, a = []; for (let h = o; h + st.dur <= c; h++) a.push(h); return a; }
-  function available(h) {
-    const now = new Date();
-    if (sameDay(date(), now) && h * 60 <= now.getHours() * 60 + now.getMinutes()) return false;
-    for (let c = Math.floor(h); c < Math.ceil(h + st.dur); c++) if (isBooked(sp(), st.court, date(), c)) return false;
+  // Fill in whatever is missing or no longer offered (another branch, a sport without that court…). False until loaded.
+  function reconcile() {
+    const cfg = Leo.config(), br = Branches.current();
+    if (!cfg || !br) return false;
+    const sports = Leo.sportsAt(br.id), asked = wantSport && Leo.findSport(sports, wantSport);
+    if (asked) { st.sportId = asked.id; st.courtId = null; }
+    wantSport = null;
+    if (!sports.some((s) => s.id === st.sportId)) { st.sportId = sports[0].id; st.courtId = null; }
+    const courts = Leo.courtsAt(br.id, st.sportId);
+    if (!courts.some((c) => c.id === st.courtId)) st.courtId = (courts.find((c) => c.is_bookable) || courts[0]).id;
+    if (!cfg.durations.includes(st.dur)) st.dur = cfg.durations[0];
+    if (!Leo.days().includes(st.day)) st.day = Leo.days()[0];
     return true;
   }
-  function priceOf(start) {
-    const [peak, off] = sp().rate; let total = 0, pk = 0, op = 0;
-    for (let t = start; t < start + st.dur - 1e-6; t += 0.5) { if (isPeak(date(), t)) { total += peak / 2; pk++; } else { total += off / 2; op++; } }
-    return { total, label: pk && op ? 'Peak + off-peak' : pk ? 'Peak' : 'Off-peak' };
+  const view = () => Leo.slots(st.courtId, st.day, st.dur);                         // { slots (null until loaded), error }
+  const upcoming = (v) => (v.slots || []).filter((s) => new Date(s.starts_at).getTime() > Date.now());
+  const chosen = (v) => upcoming(v).find((s) => s.starts_at === st.start);
+  // keep the chosen time while it is still free, otherwise the next free one
+  function ensureStart(v) {
+    if (!v.slots) return;
+    const keep = chosen(v);
+    if (keep && keep.available) return;
+    const first = upcoming(v).find((s) => s.available);
+    st.start = first ? first.starts_at : null;
   }
-  function ensureStart() {
-    const hrs = slotHours();
-    if (st.start != null && hrs.includes(st.start) && available(st.start)) return;
-    const first = hrs.find(available); st.start = first == null ? null : first;
-  }
-  // start on the first day that still has a free slot (late evening → tomorrow)
-  for (let i = 0; i < 14 && !slotHours().some(available); i++) st.date = Math.min(13, st.date + 1);
-  ensureStart();
 
   /* ---------- markup ---------- */
   const root = document.createElement('div');
@@ -101,139 +83,107 @@
         </div>
         <footer class="bp-foot">
           <p class="bp-sum" id="bpSum"></p>
-          <div class="bp-pay"><div class="bp-price"><strong id="bpPrice">₹0</strong><span id="bpNote"></span></div>
-            <button class="bp-cta" id="bpCta" type="button">Confirm &amp; Pay <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+          <div class="bp-pay"><div class="bp-price"><strong id="bpPrice">—</strong><span id="bpNote"></span></div>
+            <button class="bp-cta" id="bpCta" type="button" disabled>Confirm &amp; Pay <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
         </footer>
-      </div>
-      <div class="bp-done" id="bpDone" hidden>
-        <button class="bp-x bp-x-done" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
-        <div class="bp-tick"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-        <h3>Slot held for you</h3>
-        <dl id="bpDoneList"></dl>
-        <a class="bp-cta" id="bpWa" href="#" target="_blank" rel="noopener">Confirm on WhatsApp</a>
-        <button class="bp-back-btn" id="bpChange" type="button">Change booking</button>
-      </div>
-      <div class="bp-done bp-fail" id="bpFail" role="alert" hidden>
-        <button class="bp-x bp-x-done" type="button" data-bp-close aria-label="Close booking"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
-        <div class="bp-tick bp-tick-x"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
-        <h3 id="bpFailTitle" tabindex="-1">Payment failed</h3>
-        <p class="bp-fail-msg" id="bpFailMsg"></p>
-        <dl id="bpFailList"></dl>
-        <button class="bp-cta" id="bpRetry" type="button">Try payment again</button>
-        <a class="bp-cta bp-cta-ghost" id="bpWaAlt" href="#" target="_blank" rel="noopener">Book on WhatsApp instead</a>
-        <button class="bp-back-btn" id="bpFailChange" type="button">Change booking</button>
       </div>
     </div>`;
   document.body.appendChild(root);
 
   /* ---------- render ---------- */
-  const dayLabel = (d, i) => (i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }));
-
   function paintBranch() {
     const cur = Branches.index(), status = Branches.status();
-    $('#bpBranch').innerHTML = Branches.list.map((b, i) => `<option value="${i}"${i === cur ? ' selected' : ''}>${b.name}${Branches.dist(i) ? ' · ' + Branches.dist(i) : ''}</option>`).join('');
-    const near = status === 'locating' ? 'Finding the nearest branch…' : cur === Branches.nearest() ? '<b>Nearest to you</b>' : '';
+    $('#bpBranch').innerHTML = Branches.list().map((b, i) => `<option value="${i}"${i === cur ? ' selected' : ''}>${esc(b.name)}${Branches.dist(i) ? ' · ' + Branches.dist(i) : ''}</option>`).join('');
+    const near = status === 'locating' ? 'Finding the nearest branch…' : cur >= 0 && cur === Branches.nearest() ? '<b>Nearest to you</b>' : '';
     $('#bpWhere').innerHTML = [near, 'open 365 days', 'pay &amp; play'].filter(Boolean).join(' · ');
   }
 
-  function render() {
-    ensureStart();
+  const skeleton = (n, cls) => Array.from({ length: n }, () => `<span class="${cls} bp-skel" aria-hidden="true"></span>`).join('');
+  // before Leo Cal has answered (or when it can't): waiting tiles or the reason, nothing to pay
+  function renderNotReady() {
+    const err = Leo.error();
     paintBranch();
-    $('#bpSports').innerHTML = SPORTS.map((s, i) => `<li><button type="button" class="bp-sport${i === st.sport ? ' is-on' : ''}" data-sport="${i}" style="--i:${i}"><span>${s.name}</span><small>from ${inr(s.rate[1])}/hr</small></button></li>`).join('');
-    $('#bpCourts').innerHTML = sp().courts.map((c, i) => `<button type="button" class="bp-chip${i === st.court ? ' is-on' : ''}" data-court="${i}">${c[0]}${c[1] ? `<small>${c[1]}</small>` : ''}</button>`).join('');
-    $('#bpDates').innerHTML = days.map((d, i) => {
-      const wk = d.getDay() === 0 || d.getDay() === 6;
-      return `<button type="button" class="bp-day${i === st.date ? ' is-on' : ''}${wk ? ' is-wk' : ''}" data-date="${i}"><small>${i === 0 ? 'Today' : d.toLocaleDateString('en-IN', { weekday: 'short' })}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString('en-IN', { month: 'short' })}</small></button>`;
+    $('#bpSports').innerHTML = err ? '' : Array.from({ length: 5 }, () => '<li><span class="bp-sport bp-skel" aria-hidden="true"></span></li>').join('');
+    $('#bpCourts').innerHTML = $('#bpDates').innerHTML = $('#bpDur').innerHTML = '';
+    $('#bpSlots').innerHTML = err ? `<p class="bp-empty">${esc(err)}</p>` : skeleton(10, 'bp-slot');
+    $('#bpSum').textContent = ''; $('#bpPrice').textContent = '—'; $('#bpNote').textContent = '';
+    $('#bpCta').disabled = true;
+  }
+
+  function render() {
+    if (!reconcile()) return renderNotReady();
+    const cfg = Leo.config(), br = Branches.current(), v = view();
+    ensureStart(v);
+    paintBranch();
+    $('#bpSports').innerHTML = Leo.sportsAt(br.id).map((s, i) => {
+      const n = Leo.courtsAt(br.id, s.id).length;
+      return `<li><button type="button" class="bp-sport${s.id === st.sportId ? ' is-on' : ''}" data-sport="${s.id}" style="--i:${i}"><span>${esc(s.name)}</span><small>${n} ${n === 1 ? 'court' : 'courts'}</small></button></li>`;
     }).join('');
-    $('#bpDur').innerHTML = DURS.map((d) => `<button type="button" class="${d === st.dur ? 'is-on' : ''}" data-dur="${d}" aria-pressed="${d === st.dur}">${d * 60} min</button>`).join('');
-    const hrs = slotHours();
-    $('#bpSlots').innerHTML = hrs.length ? hrs.map((h) => {
-      const ok = available(h), pk = isPeak(date(), h);
-      return `<button type="button" class="bp-slot${h === st.start ? ' is-on' : ''}" role="radio" aria-checked="${h === st.start}" data-h="${h}" ${ok ? '' : 'disabled'}>${h12(h)}<small>${pk ? 'Peak' : 'Off-peak'}</small></button>`;
-    }).join('') : '<p class="bp-empty">No slots for this duration.</p>';
+    $('#bpCourts').innerHTML = Leo.courtsAt(br.id, st.sportId).map((c) => `<button type="button" class="bp-chip${c.id === st.courtId ? ' is-on' : ''}" data-court="${c.id}">${esc(c.name)}${c.is_bookable ? '' : '<small>Closed</small>'}</button>`).join('');
+    $('#bpDates').innerHTML = Leo.days().map((day, i) => {
+      const p = Leo.dayParts(day);
+      return `<button type="button" class="bp-day${day === st.day ? ' is-on' : ''}${p.weekend ? ' is-wk' : ''}" data-date="${day}"><small>${i === 0 ? 'Today' : p.wd}</small><b>${p.d}</b><small>${p.mon}</small></button>`;
+    }).join('');
+    $('#bpDur').innerHTML = cfg.durations.map((m) => `<button type="button" class="${m === st.dur ? 'is-on' : ''}" data-dur="${m}" aria-pressed="${m === st.dur}">${m} min</button>`).join('');
+    paintTimes();
+  }
+  function paintTimes() {
+    const v = view(), br = Branches.current(), el = $('#bpSlots');
+    if (!curCourt().is_bookable) el.innerHTML = '<p class="bp-empty">This court is closed for maintenance. Pick another court.</p>';
+    else if (v.error) el.innerHTML = `<p class="bp-empty">${esc(v.error)}</p>`;
+    else if (!v.slots) el.innerHTML = skeleton(10, 'bp-slot');
+    else {
+      const up = upcoming(v);
+      el.innerHTML = (up.length ? up.map((s) => {
+        const on = s.starts_at === st.start;
+        return `<button type="button" class="bp-slot${on ? ' is-on' : ''}" role="radio" aria-checked="${on}" data-start="${s.starts_at}" ${s.available ? '' : 'disabled'}>${Leo.time(s.starts_at)}<small>${s.is_peak ? 'Peak' : 'Off-peak'}</small></button>`;
+      }).join('') : `<p class="bp-empty">No more slots ${st.day === Leo.days()[0] ? 'today' : 'that day'}. Pick another date.</p>`)
+        // a branch whose online payments aren't set up yet: its times show, but nothing can be paid for there
+        + (br.unavailable_reason ? `<p class="bp-empty">${esc(br.unavailable_reason)}</p>` : '');
+    }
     paintFoot();
   }
   function paintFoot() {
-    const cta = $('#bpCta');
-    const where = `${Branches.current().name} · ${sp().courts[st.court][0]}`;
-    if (st.start == null) { $('#bpPrice').textContent = '—'; $('#bpNote').textContent = 'No free slot — try another day or branch'; $('#bpSum').textContent = `${sp().name} · ${where} · ${dayLabel(date(), st.date)}`; cta.disabled = true; return; }
-    cta.disabled = false;
-    const { total, label } = priceOf(st.start);
-    $('#bpPrice').textContent = inr(total);
-    $('#bpNote').textContent = `${label} · ${st.dur === 1 ? '1 hr' : st.dur + ' hrs'}`;
-    $('#bpSum').innerHTML = `<b>${sp().name}</b> · ${where} · ${dayLabel(date(), st.date)} · ${h12(st.start)} – ${h12(st.start + st.dur)}`;
+    const cta = $('#bpCta'), v = view(), closed = !curCourt().is_bookable, s = !closed && chosen(v);
+    const where = `${esc(Branches.current().name)} · ${esc(curCourt().name)} · ${Leo.dayLabel(st.day)}`;
+    if (!s || s.price == null) {
+      $('#bpPrice').textContent = '—';
+      $('#bpNote').textContent = closed ? 'Court closed' : !v.slots ? '' : upcoming(v).some((x) => x.available) ? 'No slot selected' : 'No free slot — try another day or branch';
+      $('#bpSum').innerHTML = `${esc(curSport().name)} · ${where}`;
+      cta.disabled = true;
+      return;
+    }
+    cta.disabled = !s.available || !curCourt().is_bookable || !Branches.current().payment;
+    $('#bpPrice').textContent = Leo.money(s.price);
+    $('#bpNote').textContent = `${s.is_peak ? 'Peak' : 'Off-peak'} · ${Leo.durCaption(st.dur)}`;
+    $('#bpSum').innerHTML = `<b>${esc(curSport().name)}</b> · ${where} · ${Leo.time(s.starts_at)} – ${Leo.time(s.ends_at)}`;
+  }
+  // fresh free slots came in: only the times and the price change
+  function renderTimes() {
+    if (!reconcile()) return;
+    const v = view();
+    if (v.slots && autoDay) {
+      autoDay = false;
+      if (st.day === Leo.days()[0] && curCourt().is_bookable && !upcoming(v).some((s) => s.available) && Leo.days()[1]) { st.day = Leo.days()[1]; return render(); }
+    }
+    ensureStart(v); paintTimes();
   }
 
   root.addEventListener('click', (e) => {
-    const t = e.target.closest('button'); if (!t) return;
-    if (t.dataset.sport != null) { st.sport = +t.dataset.sport; st.court = 0; st.start = null; render(); }
-    else if (t.dataset.court != null) { st.court = +t.dataset.court; render(); }
-    else if (t.dataset.date != null) { st.date = +t.dataset.date; render(); }
+    const t = e.target.closest('button'); if (!t || !Leo.config()) return;
+    if (t.dataset.sport != null) { st.sportId = t.dataset.sport; st.courtId = null; render(); }
+    else if (t.dataset.court != null) { st.courtId = t.dataset.court; render(); }
+    else if (t.dataset.date != null) { st.day = t.dataset.date; autoDay = false; render(); }
     else if (t.dataset.dur != null) { st.dur = +t.dataset.dur; render(); }
-    else if (t.dataset.h != null && !t.disabled) { st.start = +t.dataset.h; render(); }
+    else if (t.dataset.start != null && !t.disabled) { st.start = t.dataset.start; paintTimes(); }
   });
   $('#bpBranch').addEventListener('change', (e) => Branches.select(+e.target.value));   // redraws through Branches.onChange below
 
-  /* ---------- confirm + payment ----------
-     TODO: replace processPayment() with the real payment gateway call (Razorpay / PhonePe / ...). It must resolve
-     { ok: true } on success or { ok: false, reason: 'declined' | 'timeout' | 'cancelled' } on failure.
-     Demo: it always succeeds, unless the page is opened with ?payfail=1 (fail the first attempt, then succeed on retry),
-     ?payfail=2 (fail twice), ?payfail=always, or ?payfail=timeout / ?payfail=cancelled to see those messages. */
-  const FAIL_TEXT = {
-    declined: 'Your bank declined the payment. No money was charged.',
-    timeout: 'The payment timed out. If any amount was debited it will be refunded automatically.',
-    cancelled: 'The payment was cancelled. Nothing was charged and your slot is not booked yet.',
-  };
-  const demo = new URLSearchParams(location.search).get('payfail');
-  let failsLeft = demo === 'always' ? Infinity : /^\d+$/.test(demo || '') ? +demo : demo ? 1 : 0;
-  const demoReason = FAIL_TEXT[demo] ? demo : 'declined';
-  function processPayment() {
-    return new Promise((resolve) => setTimeout(() => {
-      if (failsLeft > 0) { failsLeft--; resolve({ ok: false, reason: demoReason }); } else resolve({ ok: true });
-    }, reduce ? 200 : 1700));
-  }
-
-  const ctaHTML = $('#bpCta').innerHTML;
-  const show = (id) => { ['bpMain', 'bpDone', 'bpFail'].forEach((k) => { $('#' + k).hidden = k !== id; }); root.classList.toggle('is-done', id !== 'bpMain'); };
-  function booking() {
-    const { total } = priceOf(st.start);
-    const time = `${h12(st.start)} – ${h12(st.start + st.dur)}`;
-    const long = date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    const br = Branches.current().name;
-    const rows = [['Branch', br], ['Sport', sp().name], ['Court', sp().courts[st.court][0]], ['Date', dayLabel(date(), st.date)], ['Time', time], ['Total', inr(total)]];
-    const msg = `Hi Crosscourt! I'd like to book ${sp().name} (${sp().courts[st.court][0]}) at the ${br} branch on ${long}, ${time}. Estimated total ${inr(total)}.`;
-    return { rows, wa: `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}` };
-  }
-  const list = (rows) => rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-
-  let paying = false;
-  async function pay() {
-    if (st.start == null || paying) return;
-    paying = true;
-    const cta = $('#bpCta'), retry = $('#bpRetry');
-    [cta, retry].forEach((b) => { b.disabled = true; });
-    cta.innerHTML = '<span class="bp-spin" aria-hidden="true"></span> Processing payment…';
-    retry.innerHTML = '<span class="bp-spin" aria-hidden="true"></span> Processing payment…';
-    const b = booking();
-    let res;
-    try { res = await processPayment(b); } catch (err) { res = { ok: false, reason: 'timeout' }; }
-    paying = false;
-    cta.innerHTML = ctaHTML; retry.textContent = 'Try payment again'; [cta, retry].forEach((x) => { x.disabled = false; });
-    if (res.ok) {
-      $('#bpDoneList').innerHTML = list(b.rows); $('#bpWa').href = b.wa;
-      show('bpDone');
-    } else {
-      $('#bpFailMsg').textContent = FAIL_TEXT[res.reason] || FAIL_TEXT.declined;
-      $('#bpFailList').innerHTML = list(b.rows.filter(([k]) => k !== 'Court'));
-      $('#bpWaAlt').href = b.wa;
-      show('bpFail');
-      setTimeout(() => $('#bpFailTitle').focus({ preventScroll: true }), reduce ? 0 : 400);
-    }
-  }
-  $('#bpCta').addEventListener('click', pay);
-  $('#bpRetry').addEventListener('click', pay);
-  $('#bpChange').addEventListener('click', () => show('bpMain'));
-  $('#bpFailChange').addEventListener('click', () => show('bpMain'));
+  /* ---------- confirm: Leo Cal's pop-up (above this panel) takes the details and the payment ---------- */
+  $('#bpCta').addEventListener('click', () => {
+    const s = chosen(view()); if (!s) return;
+    Leo.checkout({ branchId: Branches.current().id, sportId: st.sportId, courtId: st.courtId, slot: s, duration: st.dur });
+  });
 
   /* ---------- open / close ---------- */
   const nav = $('#nav');
@@ -256,13 +206,16 @@
     if (nav && !navHadOnMenu && !(nav.classList.contains('menu-open'))) nav.classList.remove('on-menu');
     if (xcs().unlock) xcs().unlock(); else document.body.style.overflow = '';
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-    setTimeout(() => { if (!isOpen && root.classList.contains('is-done')) show('bpMain'); }, 900);
   }
   root.addEventListener('click', (e) => { if (e.target.closest('[data-bp-close]')) close(); });
   // branch changed (here, in the hero card, or nearest located) → that branch's availability; status-only → just the picker.
   // While closed there's nothing to do: open() renders.
   Branches.onChange((moved) => { if (isOpen) (moved ? render : paintBranch)(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  // Leo Cal answered (or failed) → everything; new free slots → the times
+  Leo.onUpdate((what) => { if (isOpen) (what === 'slots' ? renderTimes : render)(); });
+  // Escape closes the panel — but not while Leo Cal's pop-up is above it: that Escape is the pop-up's. Capture phase, so
+  // this runs before embed.js's own listener has removed the pop-up.
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.querySelector('[role="dialog"][aria-label="Book a court"]:not(#bp)')) close(); }, true);
   // opening the menu replaces the booking panel
   document.addEventListener('click', (e) => { if (isOpen && e.target.closest('#menuBtn')) { root.classList.add('is-instant'); close(); setTimeout(() => root.classList.remove('is-instant'), 60); } }, true);
 
@@ -278,8 +231,7 @@
     e.preventDefault(); e.stopPropagation();
     if (isOpen) return;
     // sport-specific links (data-book-sport="pickleball") open the panel with that sport already selected
-    const want = SPORTS.findIndex((x) => x.id === a.dataset.bookSport);
-    if (want >= 0 && want !== st.sport) { st.sport = want; st.court = 0; st.start = null; }
+    if (a.dataset.bookSport) wantSport = a.dataset.bookSport;
     const menuIsOpen = nav && nav.classList.contains('menu-open');
     if (menuIsOpen && xcs().closeMenu) { xcs().closeMenu(); setTimeout(open, 560); } else open();
   }, true);
