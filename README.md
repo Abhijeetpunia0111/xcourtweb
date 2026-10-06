@@ -11,9 +11,12 @@ Booking is Leo Cal's, as a drop-in: the site only carries its snippet, and Leo C
 - **The hero card** is `<div class="bk-leo" data-leo-cal-inline>` in `#bookCard`. Leo Cal fills it with its booking card
   (branch, sport, court, date, duration, free times, price), and "Confirm & Pay" opens its pop-up for the visitor's
   details and the payment. Where the card sits, its width and its shadow are this site's CSS (`.booking`, `.bk-leo`).
-- **Every "Book a court" link** has `data-leo-cal` and opens Leo Cal's pop-up: the full booking panel on a desktop,
-  the whole screen on a phone. `data-sport="Tennis"` opens it on that sport, matched to Leo Cal's sports by name
-  (`cricket` → "Box Cricket"). The hero button and the phone bar follow the carousel's sport.
+- **Every "Book a court" link** has `data-leo-cal` and opens Leo Cal's booking panel. On a desktop it drops from the
+  top as a full-width sheet under the header, like the old booking panel (`data-popup="sheet" data-popup-header="#nav"`
+  on the `embed.js` tag; `js/main.js` / `js/shell.js` turn the header dark-on-paper while it's open, and the Menu button
+  closes it first). On a phone it's the whole screen. `data-sport="Tennis"` opens it on that sport, matched to Leo Cal's
+  sports by name (`cricket` → "Box Cricket"). The hero button and the phone bar follow the carousel's sport. A slot
+  picked on the hero card opens Leo Cal's centred pop-up instead, straight on the details and payment.
 - **The card follows the carousel too** (`CARD_FOLLOWS_SLIDES` in `js/main.js`; `false` leaves it on Leo Cal's own
   default): each slide sets the card's `data-sport`. Once the visitor picks a sport in the card themselves, Leo Cal stops
   following and fires `leo-cal:change`; the carousel then goes to that sport's slide and stops advancing.

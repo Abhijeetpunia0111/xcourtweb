@@ -184,9 +184,17 @@
     if (idx !== cur) goTo(idx, idx > cur ? 1 : -1);
     setAutoplayPaused(true);
   });
-  let leoOpen = false;
-  addEventListener('leo-cal:open', () => { leoOpen = true; if (lenis) lenis.stop(); syncHold(); });
-  addEventListener('leo-cal:close', () => { leoOpen = false; if (lenis && !menuOpen) lenis.start(); syncHold(); });
+  // "Book a court" links drop Leo Cal's sheet under the header (data-popup="sheet" data-popup-header="#nav" on the
+  // embed.js tag): the header goes dark-on-paper, as over the menu.
+  let leoOpen = false, navHadOnMenu = false;
+  addEventListener('leo-cal:open', () => {
+    leoOpen = true; navHadOnMenu = nav.classList.contains('on-menu'); nav.classList.add('on-menu');
+    if (lenis) lenis.stop(); syncHold();
+  });
+  addEventListener('leo-cal:close', () => {
+    leoOpen = false; if (!navHadOnMenu && !menuOpen) nav.classList.remove('on-menu');
+    if (lenis && !menuOpen) lenis.start(); syncHold();
+  });
 
   /* ----------------------------------------------------------
      Hero carousel
@@ -432,7 +440,10 @@
     if (!lenis) document.body.style.overflow = ''; else if (!leoOpen) lenis.start();   // Leo Cal's pop-up may be opening over it
     syncHold();
   }
-  menuBtn.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
+  menuBtn.addEventListener('click', () => {
+    if (leoOpen && window.LeoCal) window.LeoCal.close();   // the menu would open under Leo Cal's sheet
+    menuOpen ? closeMenu() : openMenu();
+  });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menuOpen) closeMenu(); });
 
   /* ----------------------------------------------------------
