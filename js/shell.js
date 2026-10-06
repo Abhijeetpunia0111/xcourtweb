@@ -85,14 +85,20 @@
     menuBtn.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true');
     nav.classList.remove('on-menu', 'menu-open');
     $('.sr', menuBtn).textContent = 'Open menu';
-    mtl.timeScale(reduce ? 20 : 1.5).reverse(); unlock();
+    mtl.timeScale(reduce ? 20 : 1.5).reverse(); if (!leoOpen) unlock();   // Leo Cal's pop-up may be opening over it
   }
   menuBtn.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
+  /* ---------- Leo Cal: "Book a court" ([data-leo-cal]) opens its pop-up over the page ---------- */
+  let leoOpen = false;
+  addEventListener('leo-cal:open', () => { leoOpen = true; lock(); });
+  addEventListener('leo-cal:close', () => { leoOpen = false; if (!menuOpen) unlock(); });
+  document.addEventListener('click', (e) => { if (menuOpen && e.target.closest('[data-leo-cal]')) closeMenu(); });
+
   /* ---------- in-page anchors ---------- */
   document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]'); if (!a) return;
+    const a = e.target.closest('a[href^="#"]'); if (!a || a.hasAttribute('data-leo-cal')) return;
     const id = a.getAttribute('href'); if (id === '#') return;
     const target = id === '#top' ? null : $(id);
     if (id !== '#top' && !target) return;
