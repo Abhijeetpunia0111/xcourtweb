@@ -87,13 +87,17 @@
     $('.sr', menuBtn).textContent = 'Open menu';
     mtl.timeScale(reduce ? 20 : 1.5).reverse(); if (!leoOpen) unlock();   // Leo Cal's pop-up may be opening over it
   }
-  menuBtn.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
+  menuBtn.addEventListener('click', () => {
+    if (leoOpen && window.LeoCal) window.LeoCal.close();   // the menu would open under Leo Cal's sheet
+    menuOpen ? closeMenu() : openMenu();
+  });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
-  /* ---------- Leo Cal: "Book a court" ([data-leo-cal]) opens its pop-up over the page ---------- */
-  let leoOpen = false;
-  addEventListener('leo-cal:open', () => { leoOpen = true; lock(); });
-  addEventListener('leo-cal:close', () => { leoOpen = false; if (!menuOpen) unlock(); });
+  /* ---------- Leo Cal: "Book a court" ([data-leo-cal]) drops its sheet under the header; the header goes
+     dark-on-paper meanwhile, as over the menu ---------- */
+  let leoOpen = false, navHadOnMenu = false;
+  addEventListener('leo-cal:open', () => { leoOpen = true; navHadOnMenu = nav.classList.contains('on-menu'); nav.classList.add('on-menu'); lock(); });
+  addEventListener('leo-cal:close', () => { leoOpen = false; if (!navHadOnMenu && !menuOpen) nav.classList.remove('on-menu'); if (!menuOpen) unlock(); });
   document.addEventListener('click', (e) => { if (menuOpen && e.target.closest('[data-leo-cal]')) closeMenu(); });
 
   /* ---------- in-page anchors ---------- */
