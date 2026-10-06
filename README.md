@@ -5,11 +5,26 @@ Open `index.html`, or serve the folder (`npx serve .`) for best results.
 
 ## Leo Cal (booking)
 
-The hero booking card and the booking panel are this site's own UI, filled with Leo Cal's real data: `js/leocal.js` reads
-the branches, sports, courts, durations, prices and free slots from `https://api.turfleo.com` with the venue's publishable
-key. "Confirm & Pay" opens Leo Cal's pop-up (`cal.turfleo.com/v1/embed.js`) on the chosen slot, where the visitor enters
-their details and pays. (The pop-up opens straight on the details step with the current Leo Cal build — gamexo
-`pnpm cal:deploy`; an older `embed.js` opens it on its own picker, with the branch / sport / court preselected.)
+Booking is Leo Cal's, as a drop-in: the site only carries its snippet, and Leo Cal draws everything. The
+`embed.js` script in each page's `<head>` loads it from `cal.turfleo.com`:
+
+- **The hero card** is `<div class="bk-leo" data-leo-cal-inline>` in `#bookCard`. Leo Cal fills it with its booking card
+  (branch, sport, court, date, duration, free times, price), and "Confirm & Pay" opens its pop-up for the visitor's
+  details and the payment. Where the card sits, its width and its shadow are this site's CSS (`.booking`, `.bk-leo`).
+- **Every "Book a court" link** has `data-leo-cal` and opens Leo Cal's pop-up: the full booking panel on a desktop,
+  the whole screen on a phone. `data-sport="Tennis"` opens it on that sport, matched to Leo Cal's sports by name
+  (`cricket` → "Box Cricket"). The hero button and the phone bar follow the carousel's sport.
+- **The card follows the carousel too** (`CARD_FOLLOWS_SLIDES` in `js/main.js`; `false` leaves it on Leo Cal's own
+  default): each slide sets the card's `data-sport`. Once the visitor picks a sport in the card themselves, Leo Cal stops
+  following and fires `leo-cal:change`; the carousel then goes to that sport's slide and stops advancing.
+- **Phones** don't get the card over the hero (`.bk-leo` is hidden under 900px, and Leo Cal doesn't load it there);
+  the lime "Tap to book" bar (`.bk-toggle`) opens the pop-up instead.
+- While the pop-up is open the page holds still: Leo Cal fires `leo-cal:open` / `leo-cal:close` on `window`, and
+  `js/main.js` / `js/shell.js` stop Lenis, the carousel and the hero video in between. `leo-cal:booked` fires on a
+  confirmed booking, for analytics.
+
+How it looks and what it offers (branches, courts, durations, prices, peak hours, two weeks of dates) is changed in
+Leo Cal and the club's dashboard, not here.
 
 The pages only carry the placeholder `data-key="gxp_YOUR_KEY"`, so the real key never goes into git. The one build step,
 `node tools/build.mjs`, copies the site to `dist/` (gitignored) with the key from the `LEO_CAL_KEY` env var filled in;
@@ -17,7 +32,7 @@ Vercel runs it and serves `dist/` (`vercel.json`).
 
 - Vercel: Project → Settings → Environment Variables → `LEO_CAL_KEY` (Production + Preview), then redeploy.
 - Local: put `LEO_CAL_KEY=gxp_…` in `.env.local` (gitignored), then `node tools/build.mjs && npx serve dist`.
-  Opening the source pages directly still works, but the booking card says online booking isn't set up (placeholder key).
+  Opening the source pages directly still works, but the booking card stays empty (placeholder key).
 
 The key still reaches every visitor's browser, so it is not a secret: what protects it is the allowed origins for the key
 in Leo Cal. The API only answers websites on that list, so add the production domain there, plus localhost / preview
@@ -82,22 +97,22 @@ The photos were cut from the venue shoot (`XCS Venue images`; the `.dng` RAWs ne
 Tennis, Pickleball, Swimming, Gym, Table Tennis, Box Cricket, Football, Foosball.
 - Carousel slides = the 5 entries in `SPORTS` (`js/main.js`) without `extra: true` (they have hero media).
 - Gym / Table Tennis / Foosball are `extra: true`: no carousel slide (no hero photo/video yet — add one, drop `extra`, and it becomes a slide), but their Facilities links still book them.
-- What can be booked — courts, hours, durations, prices — comes from Leo Cal. A slide or a `data-book-sport` link is matched to Leo Cal's sport by name (`cricket` → "Box Cricket").
+- What can be booked — courts, hours, durations, prices — comes from Leo Cal. A slide's or a link's `data-sport` is matched to Leo Cal's sport by name (`cricket` → "Box Cricket"); a sport Leo Cal doesn't offer opens on its first one.
 - Tournaments page still lists 6 competitive sports (no gym / foosball events yet).
-
-## Booking panel (all pages)
-
-`js/bookpanel.js` + `css/bookpanel.css` — a panel that drops from the top like the menu: sport + court on the left, date + duration + time on the right.
-Every "Book a court" / "Book court" link opens it, on every page, **except** while the home-page hero is on screen (there the hero's own booking card is used).
-Same Leo Cal data and checkout as the hero card (see "Leo Cal" above).
 
 ## Branches
 
-The branch list is Leo Cal's. `js/branches.js` holds the selected branch, shared by the hero card and the booking panel (load order on every page: `leocal.js`, `branches.js`, then `main.js` / `bookpanel.js`).
-The default is the branch nearest the visitor: if they already allowed location it's used on load, otherwise location is asked for on their first interaction with the booking card / panel (never as a cold prompt on page load). If it's refused, the first branch that can take a payment is used and the hero's branch menu offers "Find my nearest branch". A branch picked by hand wins and is kept for the visit, across pages.
-Leo Cal has no map positions, so they live in `POSITIONS` in `js/branches.js`, by branch name (Gandipet's is approximate). With fewer than two positioned branches there is no "nearest" and location is never asked for.
+Leo Cal's: its card and pop-up have a branch picker, with each branch's distance once the visitor's location is known.
+They open on the branch nearest the visitor, so long as two or more branches have a **map position** in the dashboard
+(Settings → Branches → a branch → Map position; on Google Maps, right-click the branch and copy the first line of the
+menu). Gandipet's old position here was approximately `17.392, 78.318`.
 
-Note: nothing on the page may use `id="book"` (the hero card is `#bookCard`) — a native anchor jump into the overflow-hidden hero breaks its layout.
+Leo Cal asks for location when its pop-up opens, or on the first tap on the hero card — never on page load — and uses it
+straight away if the visitor already allowed it. Until then, or if it's refused, the first branch that can take a payment
+is used; the branch menu also has "Find my nearest branch". A branch picked by hand wins and is kept for the visit,
+across pages, and so does `data-branch="Gandipet"` on the card's div or a link.
+
+Note: nothing on the page may use `id="book"` (the hero card is `#bookCard`) — a native anchor jump into the overflow-hidden hero breaks its layout. `index.html#book` (from another site) opens Leo Cal's pop-up.
 
 ## Tournaments hero video
 
@@ -113,13 +128,12 @@ Not loaded by any page right now (it was the tournaments hero before the video).
 ## Things to confirm with the club
 
 - **Leo Cal setup** - branches, courts, durations, prices and peak hours all come from the club's Leo Cal account; the site's domains must be in the key's allowed origins.
-- **Branch positions** - one per branch in `POSITIONS` (`js/branches.js`) for "nearest branch".
 - Dummy copy: Facilities, Why Crosscourt, Membership blurbs, promo-card text, footer email.
 
 ## Structure
 
 - `js/scenes.js` - procedural SVG placeholder scenes
-- `js/main.js` - carousel, booking card, menu, scroll reveals
+- `js/main.js` - carousel, menu, scroll reveals (the booking card is Leo Cal's)
 - `css/styles.css` - all styling (tokens at top)
 #   x c o u r t w e b 
  

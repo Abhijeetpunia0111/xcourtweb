@@ -1,8 +1,9 @@
 /* ==========================================================
    Crosscourt Sports Club - landing page behaviour
-   - hero carousel (14s per sport) synced with the booking card
+   - hero carousel (14s per sport)
    - full-screen menu animation
-   - booking card (sport / court / date / duration / slots / price)
+   Booking is Leo Cal's: the hero card is its <div data-leo-cal-inline>, and every
+   [data-leo-cal] link opens its pop-up (the embed.js script in <head> does both).
    ========================================================== */
 (() => {
   'use strict';
@@ -11,7 +12,6 @@
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const root = document.documentElement;
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const mqMobile = matchMedia('(max-width: 900px)');
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -19,11 +19,10 @@
      CONFIG - edit these to match the business
   ---------------------------------------------------------- */
   const SLIDE_SECONDS = 14;               // how long a slide WITHOUT a video stays; slides with a video last as long as the video
-  const Leo = window.XCSLeo;             // real courts, prices and free slots (js/leocal.js)
-  const Branches = window.XCSBranches;   // the selected / nearest branch (js/branches.js)
+  const CARD_FOLLOWS_SLIDES = true;       // the hero's booking card shows the sport on screen (false: Leo Cal's own default)
 
   // Carousel order = array order (Swimming, Pickleball, Football, Tennis, Box Cricket).
-  // What can be booked (courts, prices, hours) comes from Leo Cal; a slide's sport is matched to Leo Cal's by name.
+  // "Book a court" on a slide opens Leo Cal on that sport; Leo Cal matches it to its own sports by name.
   const SPORTS = [
     {
       id: 'swimming', name: 'Swimming',
@@ -59,7 +58,7 @@
       sub: 'A netted arena for quick, high-energy games with your crew.',
       tags: ['Netted arena', 'Turf surface'],
     },
-    // No hero slide yet: not in the carousel, but data-book-sport links (Facilities) still book them.
+    // No hero slide yet: not in the carousel (the Facilities cards book these with data-sport).
     {
       id: 'gym', name: 'Gym', extra: true,
       tags: ['Fully equipped', 'Open 7 AM – 10 PM'],
@@ -161,226 +160,33 @@
   const slideEls = $$('.slide', slidesEl);
 
   /* ----------------------------------------------------------
-     Booking card — real branches, courts, prices and free slots from Leo Cal (js/leocal.js); "Confirm & Pay" opens
-     Leo Cal's pop-up on the chosen slot for the visitor's details and the payment.
+     Booking — Leo Cal. The buttons that book "the sport on screen" (the hero's and the
+     phone bar's) follow the carousel, and so does the card (its data-sport) until the
+     visitor picks a sport in it themselves: then the carousel goes to that sport and stays.
+     While Leo Cal's pop-up is open the page holds still.
   ---------------------------------------------------------- */
-  const st = { sportId: null, courtId: null, day: null, dur: null, start: null };   // start = the chosen slot's starts_at
-  let autoDay = true;   // once, when the first times arrive: nothing left today (late evening) → tomorrow
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const curSport = () => Leo.config().sports.find((s) => s.id === st.sportId);
-  const curCourt = () => Leo.config().courts.find((c) => c.id === st.courtId);
-  // does this Leo Cal sport show on carousel slide / SPORTS entry `sp`?
-  const isSport = (leo, sp) => !!(leo && Leo.findSport([leo], sp.id, sp.name));
-
-  // Fill in whatever is missing or no longer offered (another branch, a sport without that court…). False until loaded.
-  function reconcile() {
-    const cfg = Leo.config(), br = Branches.current();
-    if (!cfg || !br) return false;
-    const sports = Leo.sportsAt(br.id);
-    if (!sports.some((s) => s.id === st.sportId)) { st.sportId = (Leo.findSport(sports, SPORTS[cur].id, SPORTS[cur].name) || sports[0]).id; st.courtId = null; }
-    const courts = Leo.courtsAt(br.id, st.sportId);
-    if (!courts.some((c) => c.id === st.courtId)) st.courtId = (courts.find((c) => c.is_bookable) || courts[0]).id;
-    if (!cfg.durations.includes(st.dur)) st.dur = cfg.durations[0];
-    if (!Leo.days().includes(st.day)) st.day = Leo.days()[0];
-    return true;
+  const booking = $('#bookCard'), card = $('.bk-leo', booking);
+  const sportLinks = [...$$('.hero-cta, .bk-toggle'), ...(CARD_FOLLOWS_SLIDES ? [card] : [])];
+  function setSport(n) {
+    sportLinks.forEach((a) => { a.dataset.sport = SPORTS[n].name; });
+    $('#tgSport').textContent = SPORTS[n].name;
   }
-  const view = () => Leo.slots(st.courtId, st.day, st.dur);                         // { slots (null until loaded), error }
-  const upcoming = (v) => (v.slots || []).filter((s) => new Date(s.starts_at).getTime() > Date.now());
-  const chosen = (v) => upcoming(v).find((s) => s.starts_at === st.start);
-  // keep the chosen time while it is still free, otherwise the next free one — the card always shows a price
-  function ensureStart(v) {
-    if (!v.slots) return;
-    const keep = chosen(v);
-    if (keep && keep.available) return;
-    const first = upcoming(v).find((s) => s.available);
-    st.start = first ? first.starts_at : null;
-  }
-
-  /* ---------- dropdown rendering ---------- */
-  const dd = (name) => $(`.dd[data-dd="${name}"]`);
-  const opt = (val, html, sel, i) => `<button class="dd-opt${sel ? ' is-sel' : ''}" role="option" aria-selected="${!!sel}" data-val="${val}" style="--i:${i}">${html}</button>`;
-
-  const GEO = { idle: 'Find my nearest branch', locating: 'Finding your location…', failed: 'Location unavailable · Try again' };
-  function renderBranch() {
-    const near = Branches.nearest(), status = Branches.status(), br = Branches.current();
-    const geo = status === 'done' || !Branches.locatable() ? '' : `<button class="dd-geo" type="button"${status === 'locating' ? ' disabled' : ''}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${GEO[status]}</button>`;
-    dd('branch').querySelector('.dd-menu').innerHTML = Branches.list().map((b, i) => {
-      const meta = [Branches.dist(i), i === near ? 'Nearest' : ''].filter(Boolean).join(' · ');
-      return opt(i, `<span class="dd-2"><span>${esc(b.name)}</span>${b.city ? `<small>${esc(b.city)}</small>` : ''}</span>${meta ? `<small>${meta}</small>` : ''}`, i === Branches.index(), i);
-    }).join('') + geo;
-    if (!br) return;
-    $('#vBranch').textContent = br.name;
-    $('#vBranchKm').textContent = Branches.dist(Branches.index()) && '· ' + Branches.dist(Branches.index());
-  }
-
-  function renderMenus() {
-    const cfg = Leo.config(), br = Branches.current();
-    dd('sport').querySelector('.dd-menu').innerHTML = Leo.sportsAt(br.id).map((s, i) => {
-      const n = Leo.courtsAt(br.id, s.id).length;
-      return opt(s.id, `<span>${esc(s.name)}</span><small>${n} ${n === 1 ? 'court' : 'courts'}</small>`, s.id === st.sportId, i);
-    }).join('');
-    dd('court').querySelector('.dd-menu').innerHTML = Leo.courtsAt(br.id, st.sportId).map((c, i) => opt(c.id, `<span>${esc(c.name)}</span>${c.is_bookable ? '' : '<small>Closed</small>'}`, c.id === st.courtId, i)).join('');
-    dd('date').querySelector('.dd-menu').innerHTML = Leo.days().map((day, i) => {
-      const p = Leo.dayParts(day);
-      return opt(day, `<span class="d-w">${i === 0 ? 'Today' : p.wd}</span><span class="d-n">${p.d}</span><span class="d-w">${p.mon}</span>`, day === st.day, i).replace('class="dd-opt', `class="dd-opt${p.weekend ? ' is-wk' : ''}`);
-    }).join('');
-    dd('dur').querySelector('.dd-menu').innerHTML = cfg.durations.map((m, i) => opt(m, `<span>${m} mins</span><small>${Leo.durCaption(m)}</small>`, m === st.dur, i)).join('');
-  }
-
-  function renderValues() {
-    $('#vSport').textContent = curSport().name;
-    $('#vCourt').textContent = curCourt().name;
-    $('#vDate').textContent = Leo.dayLabel(st.day);
-    $('#vDur').textContent = st.dur + ' mins';
-    $('#tgSport').textContent = curSport().name;
-  }
-
-  const skeleton = Array.from({ length: 10 }, () => '<span class="slot slot-skel" aria-hidden="true"></span>').join('');
-  function renderSlots() {
-    const el = $('#slots'), v = view(), br = Branches.current();
-    if (!curCourt().is_bookable) { el.innerHTML = '<p class="slots-empty">This court is closed for maintenance. Pick another court.</p>'; return; }
-    if (v.error) { el.innerHTML = `<p class="slots-empty">${esc(v.error)}</p>`; return; }
-    if (!v.slots) { el.innerHTML = skeleton; el.setAttribute('aria-busy', 'true'); return; }
-    el.removeAttribute('aria-busy');
-    const up = upcoming(v);
-    // only what is still ahead; the rest wrap into a grid (no sideways scrolling)
-    el.innerHTML = (up.length ? up.map((s) => {
-      const on = s.starts_at === st.start;
-      return `<button class="slot${on ? ' is-sel' : ''}${s.is_peak ? ' is-peak' : ''}" role="radio" aria-checked="${on}" data-start="${s.starts_at}" title="${s.is_peak ? 'Peak' : 'Off-peak'}" ${s.available ? '' : 'disabled'}>${Leo.time(s.starts_at)}</button>`;
-    }).join('') : `<p class="slots-empty">No more slots ${st.day === Leo.days()[0] ? 'today' : 'that day'}. Pick another date.</p>`)
-      // a branch whose online payments aren't set up yet: its times show, but nothing can be paid for there
-      + (br.unavailable_reason ? `<p class="slots-empty">${esc(br.unavailable_reason)}</p>` : '');
-  }
-
-  function renderTags() {
-    const v = view(), first = upcoming(v).find((s) => s.available);
-    $('#bkNext').textContent = !v.slots || !curCourt().is_bookable ? '' : first ? `Next free · ${Leo.time(first.starts_at)}` : 'Fully booked';
-  }
-
-  const priceTween = { v: 0 };
-  function renderPrice(animate = true) {
-    const priceEl = $('#price'), toggle = $('#tgPrice'), cta = $('#bkCta');
-    const ready = Leo.config() && Branches.current(), closed = ready && !curCourt().is_bookable;
-    const v = ready ? view() : {}, s = !closed && v.slots && chosen(v);
-    if (!s || s.price == null) {
-      priceEl.textContent = toggle.textContent = v.slots && !closed ? 'N/A' : '—';
-      $('#priceNote').textContent = closed ? 'Court closed' : v.slots ? 'No slot selected' : '';
-      cta.disabled = true;
-      return;
-    }
-    cta.disabled = !s.available || !curCourt().is_bookable || !Branches.current().payment;
-    const total = Number(s.price);
-    $('#priceNote').textContent = `${s.is_peak ? 'Peak' : 'Off-peak'} · ${Leo.durCaption(st.dur)}`;
-    toggle.textContent = Leo.money(total);
-    if (!animate || reduceMotion) { priceEl.textContent = Leo.money(total); priceTween.v = total; return; }
-    gsap.to(priceTween, { v: total, duration: 0.6, ease: 'power3.out', overwrite: true,
-      onUpdate: () => { priceEl.textContent = Leo.money(Math.round(priceTween.v)); }, onComplete: () => { priceEl.textContent = Leo.money(total); } });
-  }
-
-  // before Leo Cal has answered (or when it can't): the carousel's sport, waiting tiles or the reason, nothing to pay
-  function renderNotReady() {
-    const err = Leo.error();
-    $('#vSport').textContent = $('#tgSport').textContent = SPORTS[cur].name;
-    $('#vCourt').textContent = '—';
-    $('#slots').innerHTML = err ? `<p class="slots-empty">${esc(err)}</p>` : skeleton;
-    $('#bkNext').textContent = '';
-    renderPrice(false);
-  }
-
-  function renderAll({ swap = false, priceAnim = true } = {}) {
-    if (!reconcile()) return renderNotReady();
-    const v = view();
-    ensureStart(v); renderBranch(); renderMenus(); renderValues(); renderTags(); renderSlots(); renderPrice(priceAnim);
-    if (swap && !reduceMotion) gsap.fromTo('.booking .swap', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05, overwrite: true });
-  }
-  // fresh free slots came in: only the times and the price change
-  function renderTimes() {
-    if (!reconcile()) return;
-    const v = view();
-    if (v.slots && autoDay) {
-      autoDay = false;
-      if (st.day === Leo.days()[0] && curCourt().is_bookable && !upcoming(v).some((s) => s.available) && Leo.days()[1]) { st.day = Leo.days()[1]; return renderAll(); }
-    }
-    ensureStart(v); renderTags(); renderSlots(); renderPrice();
-  }
-
-  /* ---------- dropdown behaviour ---------- */
-  const dds = $$('.dd');
-  function closeDD(except) {
-    dds.forEach((d) => { if (d !== except && d.classList.contains('is-open')) { d.classList.remove('is-open'); d.querySelector('.dd-btn').setAttribute('aria-expanded', 'false'); } });
-    syncHold();
-  }
-  dds.forEach((d) => {
-    const btn = d.querySelector('.dd-btn'), menu = d.querySelector('.dd-menu');
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = !d.classList.contains('is-open');
-      closeDD(d);
-      d.classList.toggle('is-open', open);
-      btn.setAttribute('aria-expanded', String(open));
-      if (open) { const s = menu.querySelector('.is-sel'); if (s) menu.scrollTop = Math.max(0, s.offsetTop - 60); }
-      syncHold();
-    });
-    menu.addEventListener('click', (e) => {
-      if (e.target.closest('.dd-geo')) { Branches.locate(true); return; }   // menu stays open to show the result
-      const o = e.target.closest('.dd-opt'); if (!o) return;
-      const v = o.dataset.val, name = d.dataset.dd;
-      d.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
-      if (name === 'sport') {
-        // a sport with a hero slide: the carousel goes there too (and the card follows it)
-        st.sportId = v; st.courtId = null;
-        const slide = SLIDE_SPORTS.findIndex((sp) => isSport(curSport(), sp));
-        if (slide >= 0 && slide !== cur) goTo(slide, slide > cur ? 1 : -1); else renderAll({ swap: true });
-      }
-      else if (name === 'branch') Branches.select(+v);                      // redraws through Branches.onChange below
-      else {
-        if (name === 'court') st.courtId = v;
-        if (name === 'date') { st.day = v; autoDay = false; }
-        if (name === 'dur') st.dur = +v;
-        renderAll();
-        if (name === 'court') gsap.fromTo('#vCourt,#bkNext', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 });
-      }
-      syncHold();
-    });
+  // Leo Cal's sport → this page's entry: the same name, else Leo Cal's name containing our id ("Cricket Nets" → cricket)
+  const words = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const ourSport = (name) => {
+    const exact = SPORTS.findIndex((sp) => words(sp.name) === words(name));
+    return exact >= 0 ? exact : SPORTS.findIndex((sp) => words(name).split(' ').includes(sp.id));
+  };
+  addEventListener('leo-cal:change', (e) => {
+    if (!CARD_FOLLOWS_SLIDES || e.detail.element !== card) return;
+    const idx = ourSport(e.detail.sport.name);
+    if (idx < 0 || idx >= N) return;                       // no slide for it (gym, table tennis…)
+    if (idx !== cur) goTo(idx, idx > cur ? 1 : -1);
+    setAutoplayPaused(true);
   });
-  document.addEventListener('click', (e) => { if (!e.target.closest('.dd')) closeDD(); });
-
-  // A branch picked here or in the booking panel, or the nearest one once located → redraw with that branch's availability.
-  // Status-only changes ("Finding your location…") just redraw the branch menu: re-rendering the slots between a
-  // pointerdown and its click would swallow the click.
-  Branches.onChange((moved) => {
-    if (!moved) return renderBranch();
-    renderAll();
-    if (!reduceMotion) gsap.fromTo('#vBranch,#bkNext,#slots', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 });
-  });
-  // Leo Cal answered: the branches arrive through Branches.onChange above; an error is drawn here. New slots: the times.
-  Leo.onUpdate((what) => { if (what === 'slots') renderTimes(); else if (Leo.error()) renderAll(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDD(); if (menuOpen) closeMenu(); } });
-
-  $('#slots').addEventListener('click', (e) => {
-    const b = e.target.closest('.slot'); if (!b || b.disabled || !b.dataset.start) return;
-    st.start = b.dataset.start;
-    $$('.slot', $('#slots')).forEach((s) => { const on = s === b; s.classList.toggle('is-sel', on); s.setAttribute('aria-checked', on); });
-    renderPrice();
-  });
-
-  /* ---------- confirm: Leo Cal's pop-up takes the details and the payment ---------- */
-  $('#bkCta').addEventListener('click', () => {
-    const s = chosen(view()); if (!s) return;
-    Leo.checkout({ branchId: Branches.current().id, sportId: st.sportId, courtId: st.courtId, slot: s, duration: st.dur });
-  });
-
-  /* ---------- mobile sheet ---------- */
-  const booking = $('#bookCard'), bkToggle = $('#bkToggle');
-  function setSheet(open) {
-    booking.classList.toggle('is-collapsed', !open);
-    bkToggle.setAttribute('aria-expanded', String(open));
-    open ? holds.add('sheet') : holds.delete('sheet');
-    syncHold();
-  }
-  bkToggle.addEventListener('click', () => setSheet(booking.classList.contains('is-collapsed')));
-  const onMq = () => { if (!mqMobile.matches) { booking.classList.remove('is-collapsed'); holds.delete('sheet'); } else if (!holds.has('sheet')) booking.classList.add('is-collapsed'); syncHold(); };
-  mqMobile.addEventListener('change', onMq);
+  let leoOpen = false;
+  addEventListener('leo-cal:open', () => { leoOpen = true; if (lenis) lenis.stop(); syncHold(); });
+  addEventListener('leo-cal:close', () => { leoOpen = false; if (lenis && !menuOpen) lenis.start(); syncHold(); });
 
   /* ----------------------------------------------------------
      Hero carousel
@@ -391,10 +197,9 @@
   frame.addEventListener('scroll', () => { frame.scrollTop = 0; frame.scrollLeft = 0; });   // overflow:hidden boxes can still be scrolled by anchors / focus — never let the hero drift
 
   function syncHold() {
-    $$('.dd').some((d) => d.classList.contains('is-open')) ? holds.add('dd') : holds.delete('dd');
     frame.classList.toggle('is-paused', userPaused);
     if (!progress) return;
-    (userPaused || heroOut || holds.size || menuOpen) ? progress.pause() : progress.resume();
+    (userPaused || heroOut || holds.size || menuOpen || leoOpen) ? progress.pause() : progress.resume();
     syncVideo();
   }
 
@@ -483,7 +288,7 @@
   // silence + pause the video when the hero is off-screen or the tab is hidden
   function syncVideo() {
     const v = curVideo(); if (!isReady(v)) return;
-    if (heroOut || document.hidden) v.pause(); else if (v.paused) playVideo(v);
+    if (heroOut || leoOpen || document.hidden) v.pause(); else if (v.paused) playVideo(v);
   }
   document.addEventListener('visibilitychange', syncVideo);
 
@@ -510,15 +315,6 @@
     swapText($('#heroEyebrow'), sp.name, { delay: 0.04 });
     swapText($('#heroSub'), sp.sub, { delay: 0.12 });
     gsap.to(t, { yPercent: -118, duration: reduceMotion ? 0.01 : 0.55, ease: 'power3.in', overwrite: true, onComplete: () => { t.textContent = sp.title; gsap.fromTo(t, { yPercent: 118 }, { yPercent: 0, duration: reduceMotion ? 0.01 : 1.1, ease: 'expo.out' }); } });
-  }
-
-  // the carousel moved to slide n: the card follows, when the branch has that sport (and isn't already on it)
-  function setSport(n) {
-    if (reconcile() && !isSport(curSport(), SPORTS[n])) {
-      const s = Leo.findSport(Leo.sportsAt(Branches.current().id), SPORTS[n].id, SPORTS[n].name);
-      if (s) { st.sportId = s.id; st.courtId = null; }
-    }
-    renderAll({ swap: true });
   }
 
   function goTo(n, dir) {
@@ -580,13 +376,11 @@
   slidesEl.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
   slidesEl.addEventListener('touchend', (e) => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 50) goTo(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1); });
 
-  // hold autoplay while the visitor is filling the form
+  // hold autoplay while the visitor is picking a slot on the card
   booking.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { holds.add('hover'); syncHold(); } });
   booking.addEventListener('pointerleave', () => { holds.delete('hover'); syncHold(); });
   booking.addEventListener('focusin', () => { holds.add('focus'); syncHold(); });
   booking.addEventListener('focusout', () => { holds.delete('focus'); syncHold(); });
-  // first touch of the booking card → ask for location so the nearest branch is preselected (no prompt on page load)
-  ['pointerdown', 'focusin'].forEach((ev) => booking.addEventListener(ev, () => Branches.locate(), { passive: true }));
 
   ScrollTrigger.create({ trigger: '#top', start: 'top bottom', end: 'bottom 20%', onToggle: (s) => { heroOut = !s.isActive; syncHold(); } });
 
@@ -635,45 +429,23 @@
     nav.classList.remove('on-menu', 'menu-open');
     $('.sr', menuBtn).textContent = 'Open menu';
     mtl.timeScale(reduceMotion ? 20 : 1.5).reverse();
-    if (lenis) lenis.start(); else document.body.style.overflow = '';
+    if (!lenis) document.body.style.overflow = ''; else if (!leoOpen) lenis.start();   // Leo Cal's pop-up may be opening over it
     syncHold();
   }
   menuBtn.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
-  // shared helpers for js/bookpanel.js (same shape as the sub-pages' shell.js)
-  window.XCS = Object.assign(window.XCS || {}, {
-    scrollToY, closeMenu, isMenuOpen: () => menuOpen,
-    lock: () => (lenis ? lenis.stop() : (document.body.style.overflow = 'hidden')),
-    unlock: () => (lenis ? lenis.start() : (document.body.style.overflow = '')),
-  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menuOpen) closeMenu(); });
 
   /* ----------------------------------------------------------
-     In-page links (menu + CTAs)
+     In-page links (menu + CTAs). "Book a court" links are Leo Cal's ([data-leo-cal]): its pop-up opens over
+     the page, so from the menu the menu just goes.
   ---------------------------------------------------------- */
-  function pulseBooking() {
-    if (mqMobile.matches) setSheet(true);
-    if (!reduceMotion) gsap.fromTo('.booking .bk-card, .bk-toggle', { boxShadow: '0 0 0 0 rgba(214,242,106,.9)' }, { boxShadow: '0 0 0 14px rgba(214,242,106,0)', duration: 1.2, ease: 'power2.out', clearProps: 'boxShadow', delay: 0.5 });
-  }
   document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-leo-cal]')) { if (menuOpen) closeMenu(); return; }
     const a = e.target.closest('a[href^="#"]'); if (!a) return;
     const id = a.getAttribute('href'); if (id === '#') return;
-    const target = id === '#book' ? $('#top') : $(id); if (!target) return;
+    const target = $(id); if (!target) return;
     e.preventDefault();
-    // Sport-specific booking: the hero button books the sport on screen; any [data-book-sport="<id>"] link books that sport.
-    // Either way the booking card switches to it and the carousel stops advancing so the choice sticks while the form is filled in.
-    if (id === '#book') {
-      const want = a.dataset.bookSport || (a.classList.contains('hero-cta') ? SPORTS[cur].id : '');
-      const idx = SPORTS.findIndex((sp) => sp.id === want);
-      if (idx >= 0 && idx < N) { if (idx !== cur) goTo(idx, idx > cur ? 1 : -1); setAutoplayPaused(true); }
-      else if (idx >= N) {
-        const s = reconcile() && Leo.findSport(Leo.sportsAt(Branches.current().id), SPORTS[idx].id, SPORTS[idx].name);
-        if (s) { st.sportId = s.id; st.courtId = null; renderAll({ swap: true }); }
-        setAutoplayPaused(true);
-      }
-    }
-    const go = () => {
-      if (id === '#book' || id === '#top') { scrollToY(0); if (id === '#book') pulseBooking(); }
-      else scrollToY(target, { offset: -40 });
-    };
+    const go = () => (id === '#top' ? scrollToY(0) : scrollToY(target, { offset: -40 }));
     if (menuOpen) { closeMenu(); setTimeout(go, 520); } else go();
   });
 
@@ -715,8 +487,7 @@
   /* ----------------------------------------------------------
      Boot
   ---------------------------------------------------------- */
-  renderAll({ priceAnim: false });   // waiting tiles until Leo Cal answers (late evening → tomorrow: see renderTimes)
-  onMq();
+  setSport(0);
   startVideo(0);
 
   const heroT = $('#heroTitle .t');
@@ -736,14 +507,14 @@
       .from('.hero-foot > *', { y: 36, opacity: 0, duration: 1.2, stagger: 0.1 }, 0.55);
   }
 
-  // arriving from another page with a hash (e.g. tournaments → index.html#facilities)
+  // arriving from another page with a hash (e.g. tournaments → index.html#facilities); #book opens Leo Cal's pop-up
+  // (embed.js is async, but async scripts have all run by the time "load" fires).
   // NB: nothing in the page has id="book" on purpose — the booking card lives inside the overflow:hidden hero,
   // and a native jump to it scrolls the hero's contents sideways/upwards (the "broken layout" bug).
   window.addEventListener('load', () => {
     const h = location.hash; if (!h || h.length < 2) return;
-    const t = $(h === '#book' ? '#top' : h); if (!t) return;
-    setTimeout(() => {
-      if (h === '#book') { scrollToY(0); pulseBooking(); } else scrollToY(t, { offset: -40 });
-    }, 300);
+    if (h === '#book') { if (window.LeoCal) window.LeoCal.open(); return; }
+    const t = $(h); if (!t) return;
+    setTimeout(() => scrollToY(t, { offset: -40 }), 300);
   });
 })();

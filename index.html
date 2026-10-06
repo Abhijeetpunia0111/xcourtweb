@@ -15,8 +15,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@300..800&family=Pinyon+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/bookpanel.css">
-  <!-- Leo Cal: real availability (js/leocal.js) + the details/payment pop-up. The key is filled in by tools/build.mjs. -->
   <script src="https://cal.turfleo.com/v1/embed.js" data-key="gxp_YOUR_KEY" async></script>
   <link rel="stylesheet" href="css/ribbon.css">
 </head>
@@ -39,7 +37,7 @@
       <span class="sr">Open menu</span>
     </button>
     <i class="nav-sep" aria-hidden="true"></i>
-    <a class="nav-link" href="#book" data-book>
+    <a class="nav-link" href="#book" data-leo-cal>
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
       <span>Book a court</span>
     </a>
@@ -57,7 +55,7 @@
     <a class="icon-btn" href="tel:+918019765511" aria-label="Call +91 80197 65511">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
     </a>
-    <a class="pill" href="#book" data-book>Book court</a>
+    <a class="pill" href="#book" data-leo-cal>Book court</a>
   </div>
 </header>
 
@@ -65,7 +63,7 @@
 <nav class="menu" id="menu" aria-label="Main menu" aria-hidden="true">
   <div class="menu-in">
     <ul class="menu-links" id="menuLinks">
-      <li><a data-scene="book" data-img="assets/img/menu/book.webp" href="#book" data-book data-copy="Pick a sport, a slot and you're on court in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
+      <li><a data-scene="book" data-img="assets/img/menu/book.webp" href="#book" data-leo-cal data-copy="Pick a sport, a slot and you're on court in under ten seconds."><span class="mi">01</span><span class="ml"><span>Book a court</span></span></a></li>
       <li><a data-scene="play" data-img="assets/img/menu/play.webp" href="#pay-play" data-copy="Hourly rates for every sport. Peak and off-peak, no lock-ins."><span class="mi">02</span><span class="ml"><span>Pay &amp; Play</span></span></a></li>
       <li><a data-scene="member" data-img="assets/img/menu/member.webp" href="#membership" data-copy="Community, tennis, pickleball and gym memberships."><span class="mi">03</span><span class="ml"><span>Membership</span></span></a></li>
       <li><a data-scene="coach" data-img="assets/img/menu/coach.webp" href="#coaching" data-copy="XCS Tennis Academy. Train smart. Play hard."><span class="mi">04</span><span class="ml"><span>Coaching</span></span></a></li>
@@ -102,90 +100,19 @@
       <p class="eyebrow"><span id="heroEyebrow">Tennis</span></p>
       <h1 class="hero-title" id="heroTitle" aria-live="polite"><span class="line"><span class="t"></span></span></h1>
       <p class="hero-sub" id="heroSub"></p>
-      <a class="hero-cta" href="#book" data-book>Book a court
+      <a class="hero-cta" href="#book" data-leo-cal>Book a court
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
     </div>
 
-    <!-- ===== Booking card ===== -->
-    <aside class="booking is-collapsed" id="bookCard" aria-label="Book a court">
-      <button class="bk-toggle" id="bkToggle" aria-expanded="false" aria-controls="bkPanel">
-        <span class="bk-toggle-l"><b id="tgSport">Tennis</b><small>Tap to book</small></span>
-        <span class="bk-toggle-r"><b id="tgPrice">₹800</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></span>
+    <!-- ===== Booking card: Leo Cal's, filled in by the embed.js script in <head> ===== -->
+    <aside class="booking" id="bookCard" aria-label="Book a court">
+      <div class="bk-leo" data-leo-cal-inline></div>
+      <!-- phones: the card would cover the hero, so this bar opens Leo Cal's full-screen pop-up instead -->
+      <button class="bk-toggle" type="button" data-leo-cal>
+        <span class="bk-toggle-l"><b id="tgSport">Swimming</b><small>Tap to book</small></span>
+        <span class="bk-toggle-r"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></span>
       </button>
-
-      <div class="bk-panel" id="bkPanel">
-        <div class="bk-panel-in">
-
-          <div class="bk-card">
-            <div class="bk-top">
-              <h2 class="bk-title">Book a court</h2>
-              <div class="dd dd-loc" data-dd="branch">
-                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="sr">Branch:</span>
-                  <svg class="dd-pin" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-                  <span class="dd-v" id="vBranch">Gandipet</span>
-                  <span class="dd-km" id="vBranchKm"></span>
-                  <svg class="dd-chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="dd-menu" role="listbox" aria-label="Branch"></div>
-              </div>
-            </div>
-
-            <div class="bk-grid">
-              <div class="dd " data-dd="sport">
-                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="dd-k">Sport</span>
-                  <span class="dd-v swap" id="vSport">Tennis</span>
-                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="dd-menu " role="listbox"></div>
-              </div>
-              <div class="dd " data-dd="court">
-                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="dd-k">Court</span>
-                  <span class="dd-v swap" id="vCourt">Center Court</span>
-                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="dd-menu " role="listbox"></div>
-              </div>
-              <div class="dd dd-date" data-dd="date">
-                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="dd-k">Date</span>
-                  <span class="dd-v" id="vDate">Today</span>
-                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="dd-menu dd-menu-grid" role="listbox"></div>
-              </div>
-              <div class="dd dd-dur" data-dd="dur">
-                <button class="dd-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="dd-k">Duration</span>
-                  <span class="dd-v" id="vDur">60 mins</span>
-                  <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="dd-menu " role="listbox"></div>
-              </div>
-            </div>
-
-            <div class="slots-wrap">
-              <div class="slots-h"><span>Start time</span><span class="swap" id="bkNext"></span></div>
-              <div class="slots swap" id="slots" role="radiogroup" aria-label="Start time"></div>
-            </div>
-
-            <div class="bk-foot">
-              <div class="bk-price">
-                <strong id="price">&#8377;0</strong>
-                <span class="swap" id="priceNote">Off-peak · 1 hr</span>
-              </div>
-              <button class="bk-cta" id="bkCta" type="button">
-                <span class="bk-cta-t">Confirm &amp; Pay</span>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </aside>
 
     <!-- ===== Bottom row ===== -->
@@ -260,7 +187,7 @@
         <p class="rn-k">Crosscourt Sports Club</p>
         <h2 class="rn-h" id="ribNextTitle"><span class="rn-line">Find your rhythm,</span><span class="rn-line">one rally at a time.</span></h2>
         <p class="rn-lead">Tennis, pickleball, box cricket, football and more. Book a slot in seconds and let the game carry you.</p>
-        <a class="rn-cta" href="#book" data-book>Book a court</a>
+        <a class="rn-cta" href="#book" data-leo-cal>Book a court</a>
       </div>
     </div>
     <div class="rib-hint" id="ribHint" aria-hidden="true"><span>Scroll</span><i></i></div>
@@ -279,25 +206,25 @@
     <div class="bento">
       <article class="fac f-tennis" data-reveal data-img="assets/img/tennis.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">04+1</span><h3>Tennis</h3><p>Four ITF-standard courts and a dedicated center court.</p><a class="fac-book" href="#book" data-book data-book-sport="tennis">Book tennis <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">04+1</span><h3>Tennis</h3><p>Four ITF-standard courts and a dedicated center court.</p><a class="fac-book" href="#book" data-leo-cal data-sport="tennis">Book tennis <span aria-hidden="true">&rarr;</span></a></div>
       </article>
       <div class="fac-stack s-a">
         <article class="fac f-cricket" data-reveal data-scene="cricket">
           <div class="fac-art"></div>
-          <div class="fac-txt"><span class="fac-n">Box</span><h3>Cricket</h3><p>Netted box-cricket arena built for quick games.</p><a class="fac-book" href="#book" data-book data-book-sport="cricket">Book box cricket <span aria-hidden="true">&rarr;</span></a></div>
+          <div class="fac-txt"><span class="fac-n">Box</span><h3>Cricket</h3><p>Netted box-cricket arena built for quick games.</p><a class="fac-book" href="#book" data-leo-cal data-sport="cricket">Book box cricket <span aria-hidden="true">&rarr;</span></a></div>
         </article>
         <article class="fac f-swim" data-reveal data-scene="swimming">
           <div class="fac-art"></div>
-          <div class="fac-txt"><span class="fac-n">Pool</span><h3>Swimming</h3><p>A temperature-controlled pool, open from early morning.</p><a class="fac-book" href="#book" data-book data-book-sport="swimming">Book swimming <span aria-hidden="true">&rarr;</span></a></div>
+          <div class="fac-txt"><span class="fac-n">Pool</span><h3>Swimming</h3><p>A temperature-controlled pool, open from early morning.</p><a class="fac-book" href="#book" data-leo-cal data-sport="swimming">Book swimming <span aria-hidden="true">&rarr;</span></a></div>
         </article>
       </div>
       <article class="fac f-pickle" data-reveal data-img="assets/img/pickleball.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">12</span><h3>Pickleball</h3><p>Twelve semi-indoor courts, rain or shine, day or night.</p><a class="fac-book" href="#book" data-book data-book-sport="pickleball">Book pickleball <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">12</span><h3>Pickleball</h3><p>Twelve semi-indoor courts, rain or shine, day or night.</p><a class="fac-book" href="#book" data-leo-cal data-sport="pickleball">Book pickleball <span aria-hidden="true">&rarr;</span></a></div>
       </article>
       <article class="fac f-turf" data-reveal data-img="assets/img/football.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">Turf</span><h3>Football</h3><p>Fast, floodlit box-football turf.</p><a class="fac-book" href="#book" data-book data-book-sport="football">Book football <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">Turf</span><h3>Football</h3><p>Fast, floodlit box-football turf.</p><a class="fac-book" href="#book" data-leo-cal data-sport="football">Book football <span aria-hidden="true">&rarr;</span></a></div>
       </article>
       <div class="fac-stack s-b">
         <article class="fac f-track" data-reveal data-img="assets/img/track.jpg">
@@ -307,15 +234,15 @@
       </div>
       <article class="fac f-third" data-reveal data-img="assets/img/gym.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">Gym</span><h3>Gym</h3><p>Unmatched fitness in a fully equipped, high-performance gym.</p><a class="fac-book" href="#book" data-book data-book-sport="gym">Book gym <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">Gym</span><h3>Gym</h3><p>Unmatched fitness in a fully equipped, high-performance gym.</p><a class="fac-book" href="#book" data-leo-cal data-sport="gym">Book gym <span aria-hidden="true">&rarr;</span></a></div>
       </article>
       <article class="fac f-third" data-reveal data-img="assets/img/table-tennis.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">Tables</span><h3>Table Tennis</h3><p>Competition-ready tables that sharpen your spin, speed and reflexes.</p><a class="fac-book" href="#book" data-book data-book-sport="tabletennis">Book table tennis <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">Tables</span><h3>Table Tennis</h3><p>Competition-ready tables that sharpen your spin, speed and reflexes.</p><a class="fac-book" href="#book" data-leo-cal data-sport="table tennis">Book table tennis <span aria-hidden="true">&rarr;</span></a></div>
       </article>
       <article class="fac f-third" data-reveal data-img="assets/img/foosball.jpg">
         <div class="fac-art"></div>
-        <div class="fac-txt"><span class="fac-n">Social</span><h3>Foosball</h3><p>Friendly competition with a thrilling game of foosball at XCS.</p><a class="fac-book" href="#book" data-book data-book-sport="foosball">Book foosball <span aria-hidden="true">&rarr;</span></a></div>
+        <div class="fac-txt"><span class="fac-n">Social</span><h3>Foosball</h3><p>Friendly competition with a thrilling game of foosball at XCS.</p><a class="fac-book" href="#book" data-leo-cal data-sport="foosball">Book foosball <span aria-hidden="true">&rarr;</span></a></div>
       </article>
     </div>
   </div>
@@ -352,7 +279,7 @@
       <p class="kicker">Pay &amp; Play</p>
       <h2>Hourly rates,<br><span>no strings.</span></h2>
       <p class="lead">Peak slots run in the evenings and on weekends. Everything else is off-peak.</p>
-      <a class="btn-lime" href="#book" data-book>Book a court</a>
+      <a class="btn-lime" href="#book" data-leo-cal>Book a court</a>
     </header>
     <div class="rates" data-reveal>
       <div class="rate-h"><span>Sport</span><span>Peak</span><span>Off-peak</span></div>
@@ -427,12 +354,9 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="js/scenes.js"></script>
-<script src="js/leocal.js"></script>
-<script src="js/branches.js"></script>
 <script src="js/main.js"></script>
 <script src="js/ribbon.js"></script>
 <script src="js/fit.js"></script>
 <script src="js/totop.js"></script>
-<script src="js/bookpanel.js"></script>
 </body>
 </html>
